@@ -1,0 +1,136 @@
+@page
+@model LinkScannerApp.Pages.History.IndexModel
+@{
+    ViewData["Title"] = "Historia skanów";
+}
+
+<h1 class="h4 mb-3"><i class="bi bi-clock-history"></i> Historia skanów</h1>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <button id="exportCsv" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-download"></i> Eksport CSV
+    </button>
+    <button id="clearHistory" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-trash"></i> Wyczyść
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm align-middle" id="historyTable">
+        <thead class="table-light">
+            <tr>
+                <th>Data</th>
+                <th>URL</th>
+                <th>Status</th>
+                <th>ms</th>
+                <th>Tytuł</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<p id="emptyState" class="text-muted d-none">Brak skanów w tej sesji.</p>
+
+@section Scripts {
+<script>
+    (function () {
+        const key = 'scanHistory';
+        const table = document.getElementById('historyTable');
+        const tbody = table?.querySelector('tbody');
+        const empty = document.getElementById('emptyState');
+        const exportBtn = document.getElementById('exportCsv');
+        const clearBtn = document.getElementById('clearHistory');
+
+        let rows = [];
+        try { 
+            rows = JSON.parse(sessionStorage.getItem(key) || '[]'); 
+        } catch {}
+
+        if (!rows.length) { empty?.classList.remove('d-none'); return; }
+
+        const get = (r, lower, upper) => r?.[lower] ?? r?.[upper];
+
+        const frag = document.createDocumentFragment();
+
+        for (const r of rows) 
+        {
+            const when   = r.scannedAt || r.ScannedAt || new Date().toISOString();
+            const url    = get(r,'url','Url') || '';
+            const title  = get(r,'title','Title') || '';
+            const safeRaw= get(r,'isSafe','IsSafe');
+            const isSafe = (safeRaw === true || safeRaw === 'true');
+
+            let loadMs = get(r,'loadTimeMs','LoadTimeMs');
+
+            if (loadMs == null) {
+                const lt = get(r,'loadTime','LoadTime');
+
+                if (lt && typeof lt === 'object') {
+                    if (typeof lt.totalMilliseconds === 'number') loadMs = Math.round(lt.totalMilliseconds);
+                    else if (typeof lt.milliseconds === 'number') loadMs = Math.round(lt.milliseconds);
+                    else if (typeof lt.ticks === 'number') loadMs = Math.round(lt.ticks / 10000);
+                }
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-nowrap">${new Date(when).toLocaleString()}</td>
+                <td class="text-break"><a href="${url}" target="_blank" rel="noopener">${url}</a></td>
+                <td>${isSafe ? '✅' : '❌'}</td>
+                <td>${loadMs ?? '—'}</td>
+                <td class="text-truncate" style="max-width:380px;">${String(title).replaceAll('<','&lt;')}</td>
+            `;
+            frag.appendChild(tr);
+        }
+        tbody?.appendChild(frag);
+
+        exportBtn?.addEventListener('click', () => {
+            if (!rows.length) return;
+            const header = ['scannedAt','url','isSafe','loadTimeMs','title','description','statusCode','contentType','riskScore'];
+            const lines = [header.join(',')];
+
+            for (const r of rows) {
+                let loadMs = get(r,'loadTimeMs','LoadTimeMs');
+
+                if (loadMs == null) {
+                    const lt = get(r,'loadTime','LoadTime');
+                        if (lt && typeof lt === 'object') {
+                            if (typeof lt.totalMilliseconds === 'number') loadMs = Math.round(lt.totalMilliseconds);
+                            else if (typeof lt.milliseconds === 'number') loadMs = Math.round(lt.milliseconds);
+                            else if (typeof lt.ticks === 'number') loadMs = Math.round(lt.ticks / 10000);
+                        }
+                }
+
+                const row = [
+                    (r.scannedAt || r.ScannedAt || ''),
+                    (get(r,'url','Url') || ''),
+                    ((get(r,'isSafe','IsSafe')===true || get(r,'isSafe','IsSafe')==='true') ? 'true' : 'false'),
+                    (loadMs ?? ''),
+                    String(get(r,'title','Title') || '').replace(/"/g,'""'),
+                    String(get(r,'description','Description') || '').replace(/"/g,'""'),
+                    (get(r,'statusCode','StatusCode') ?? ''),
+                    (get(r,'contentType','ContentType') ?? ''),
+                    (get(r,'riskScore','RiskScore') ?? '')
+                    ].map(v => `"${v}"`).join(',');
+                    lines.push(row);
+            }
+
+            const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `linkscanner_history_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        });
+
+        clearBtn?.addEventListener('click', () => {
+            sessionStorage.removeItem(key);
+            const badge = document.getElementById('historyCount');
+            if (badge) { badge.textContent = '0'; badge.classList.add('d-none'); }
+            location.reload();
+        });
+    })();
+</script>
+}

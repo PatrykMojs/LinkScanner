@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LinkScannerApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/LinkScannerApp.styles.css" asp-append-version="true" />
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+    <header class="mb-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-page="/Index">
+                    <i class="bi bi-shield-check me-2"></i>
+                    <span class="fw-bold">LinkScanner</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Przełącz nawigację">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" asp-area="" asp-page="/Index">
+                                <i class="bi bi-search"></i> Skanuj
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/History/Index">
+                                <i class="bi bi-clock-history"></i> Historia
+                                <span id="historyCount" class="badge bg-light text-primary ms-1 d-none">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/Privacy">
+                                <i class="bi bi-shield-lock"></i> Privacy
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <a class="btn btn-outline-light btn-sm" target="_blank" rel="noopener"
+                           href="https://example.com">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> Demo link
+                        </a>
+                        <a class="btn btn-light btn-sm" target="_blank" rel="noopener"
+                           href="https://github.com/">
+                            <i class="bi bi-github me-1"></i> GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="flex-grow-1">
+        <div class="container">
+            <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 mb-4">
+                @RenderBody()
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-auto py-4 border-top">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+
+            <div class="text-muted">
+                &copy; 2025 · LinkScannerApp
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-center gap-3 small">
+                <a class="text-muted text-decoration-none" asp-page="/About">O projekcie</a>
+                <a class="text-muted text-decoration-none" asp-page="/Privacy">Polityka prywatności</a>
+                <a class="text-muted text-decoration-none" asp-page="/Terms">Regulamin</a>
+                @* <a class="text-muted text-decoration-none" asp-page="/Contact">Kontakt</a> *@
+            </div>
+
+            @* <div class="text-muted small">
+                Zbudowano w ASP.NET Core · <strong>Autor</strong>: Patryk Meus
+            </div> *@
+
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () =>{
+            try{
+                const items = JSON.parse(sessionStorage.getItem('scanHistory') || '[]');
+                const el = document.getElementById('historyCount');
+                if(el && items.length > 0){
+                    el.textContent = items.length;
+                    el.classList.remove('d-none');
+                }
+            } catch {}
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
