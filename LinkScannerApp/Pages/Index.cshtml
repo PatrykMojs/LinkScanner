@@ -4,53 +4,149 @@
     ViewData["Title"] = "Skanuj link";
 }
 
-<section class="mb-4">
-    <div class="text-center text-md-start">
-        <h1 class="h3 h-md-2 fw-bold mb-2">
-            <i class="bi bi-shield-check text-primary"></i> Link Scanner
-        </h1>
-        <p class="text-muted mb-0">
-            Wklej URL, a sprawdzimy metadane, szybkość i podstawowe wskaźniki bezpieczeństwa.
-        </p>
-    </div>
-</section>
-
-<section class="mb-4">
-    <form method="post" id="scanForm" class="needs-validation" novalidate>
-        <div class="row g-3 align-items-end">
-            <div class="col-12 col-md-8">
-                <label for="Url" class="form-label">Adres URL</label>
-                <div class="input-group input-group-lg">
-                    <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                    <input asp-for="Url" class="form-control" id="Url" placeholder="https://example.com" required />
-                </div>
-                <div class="form-text">
-                    Przykład: <code>https://www.microsoft.com</code> · Upewnij się, że podajesz pełny adres z <code>http(s)://</code>.
-                </div>
-                <div class="invalid-feedback">Podaj poprawny adres URL.</div>
+<section class="scanner-hero">
+    <div class="scanner-heading">
+        <div class="scanner-title-row">
+            <div class="scanner-title-icon">
+                <i class="bi bi-shield-check"></i>
             </div>
 
-            <div class="col-12 col-md-4 d-grid d-md-flex gap-2">
-                <button type="submit" class="btn btn-primary btn-lg" id="scanBtn">
-                    <span class="btn-text"><i class="bi bi-search"></i> Skanuj</span>
-                    <span class="btn-spinner d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                </button>
+            <div>
+                <h1>Link Scanner</h1>
+                <p>
+                    Wklej URL, a sprawdzimy metadane, szybkość i podstawowe wskaźniki bezpieczeństwa.
+                </p>
+            </div>
+        </div>
+    </div>
 
-                <div class="dropup">
-                    <button class="btn btn-outline-secondary btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-stars"></i> Wstaw przykłady
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><button class="dropdown-item sample-url" type="button" data-url="https://example.com">example.com</button></li>
-                        <li><button class="dropdown-item sample-url" type="button" data-url="https://www.wikipedia.org">wikipedia.org</button></li>
-                        <li><button class="dropdown-item sample-url" type="button" data-url="https://testsafebrowsing.appspot.com/s/phishing.html">test phishing</button></li>
-                        <li><button class="dropdown-item sample-url" type="button" data-url="https://expired.badssl.com/">cert wygaśnięty</button></li>
-                    </ul>
+    <div class="scanner-divider"></div>
+
+    <form method="post" id="scanForm" class="needs-validation scanner-form" novalidate>
+        <label for="Url" class="form-label">Adres URL</label>
+
+        <div class="scan-form-row">
+            <div class="scan-input-wrapper">
+                <span class="scan-input-icon">
+                    <i class="bi bi-link-45deg"></i>
+                </span>
+
+                <input asp-for="Url"
+                       class="form-control scan-input"
+                       id="Url"
+                       placeholder="https://example.com"
+                       required />
+            </div>
+
+            <button type="submit" class="btn scan-button" id="scanBtn">
+                <span class="btn-text">
+                    <i class="bi bi-search"></i>
+                    Skanuj
+                </span>
+
+                <span class="btn-spinner d-none spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"></span>
+            </button>
+        </div>
+
+        <div class="form-text scanner-hint">
+            Przykład:
+            <code>https://www.microsoft.com</code>
+            · Upewnij się, że podajesz pełny adres z
+            <code>http(s)://</code>.
+        </div>
+
+        <div class="invalid-feedback">Podaj poprawny adres URL.</div>
+    </form>
+</section>
+
+@if (Model.Result is null)
+{
+    <section class="scanner-features">
+        <div class="row g-4">
+            <div class="col-12 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-card-content">
+                        <div class="feature-icon green">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+
+                        <div>
+                            <h2>Sprawdzenie HTTPS</h2>
+                            <p>
+                                Weryfikujemy poprawność certyfikatu SSL/TLS oraz szyfrowanie połączenia.
+                            </p>
+                        </div>
+                    </div>
+
+                    <span class="feature-check green">
+                        <i class="bi bi-check"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-card-content">
+                        <div class="feature-icon blue">
+                            <i class="bi bi-hdd-network"></i>
+                        </div>
+
+                        <div>
+                            <h2>Nagłówki odpowiedzi</h2>
+                            <p>
+                                Analizujemy nagłówki HTTP pod kątem bezpieczeństwa i konfiguracji.
+                            </p>
+                        </div>
+                    </div>
+
+                    <span class="feature-check blue">
+                        <i class="bi bi-check"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-card-content">
+                        <div class="feature-icon purple">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </div>
+
+                        <div>
+                            <h2>Przekierowania</h2>
+                            <p>
+                                Sprawdzamy łańcuch przekierowań i docelowy adres końcowy.
+                            </p>
+                        </div>
+                    </div>
+
+                    <span class="feature-check purple">
+                        <i class="bi bi-check"></i>
+                    </span>
                 </div>
             </div>
         </div>
-    </form>
-</section>
+
+        <div class="privacy-strip mt-4">
+            <div class="privacy-strip-left">
+                <span class="privacy-info-icon">
+                    <i class="bi bi-info-lg"></i>
+                </span>
+
+                <div>
+                    <strong>Bezpiecznie i prywatnie</strong>
+                    <span>
+                        Nie przechowujemy żadnych danych. Każde skanowanie wykonywane jest w czasie rzeczywistym.
+                    </span>
+                </div>
+            </div>
+
+            <i class="bi bi-shield-lock privacy-strip-shield"></i>
+        </div>
+    </section>
+}
 
 @if (Model.Result is not null)
 {
@@ -58,9 +154,9 @@
 
     string StatusBadgeClass(int? code) =>
         !code.HasValue ? "bg-secondary" :
-        code.Value is >=200 and <300 ? "bg-success" :
-        code.Value is >=300 and <400 ? "bg-info" :
-        code.Value is >=400 and <500 ? "bg-warning text-dark" : "bg-danger";
+        code.Value is >= 200 and < 300 ? "bg-success" :
+        code.Value is >= 300 and < 400 ? "bg-info" :
+        code.Value is >= 400 and < 500 ? "bg-warning text-dark" : "bg-danger";
 
     var risk = Math.Clamp(r.RiskScore, 0, 100);
     string RiskBarClass(int v) => v <= 30 ? "bg-success" : v <= 60 ? "bg-warning text-dark" : "bg-danger";
@@ -79,7 +175,7 @@
             favicon = favUri.ToString();
         }
     }
-    catch {}
+    catch { }
 
     <section class="mt-4">
         <div class="row g-4">
@@ -96,6 +192,7 @@
                             {
                                 <img src="@favicon" alt="favicon" width="24" height="24" class="rounded border" />
                             }
+
                             <a class="link-primary text-break" href="@r.Url" target="_blank" rel="noopener">
                                 @r.Url <i class="bi bi-box-arrow-up-right ms-1"></i>
                             </a>
@@ -109,18 +206,21 @@
                                     <div class="small text-muted mt-1">v@r.HttpVersion</div>
                                 </div>
                             </div>
+
                             <div class="col-6 col-md-3">
                                 <div class="p-3 bg-light rounded-3 border text-center">
                                     <div class="text-muted small">TTFB</div>
                                     <div class="fw-semibold">@(r.TtfbMs?.ToString() ?? "—") ms</div>
                                 </div>
                             </div>
+
                             <div class="col-6 col-md-3">
                                 <div class="p-3 bg-light rounded-3 border text-center">
                                     <div class="text-muted small">Pobranie</div>
                                     <div class="fw-semibold">@(r.LoadTime?.TotalMilliseconds.ToString("0") ?? "—") ms</div>
                                 </div>
                             </div>
+
                             <div class="col-6 col-md-3">
                                 <div class="p-3 bg-light rounded-3 border text-center">
                                     <div class="text-muted small">HTML</div>
@@ -139,12 +239,14 @@
                                     <div class="fw-semibold">@r.ContentType</div>
                                 </div>
                             </div>
+
                             <div class="col-12 col-md-6">
                                 <div>
                                     <div class="d-flex justify-content-between">
                                         <div class="text-muted small">RiskScore</div>
                                         <div class="small fw-semibold">@risk/100</div>
                                     </div>
+
                                     <div class="progress" role="progressbar" aria-valuenow="@risk" aria-valuemin="0" aria-valuemax="100">
                                         <div class="progress-bar @RiskBarClass(risk)" style="width:@risk%"></div>
                                     </div>
@@ -155,19 +257,25 @@
                         @if (!string.IsNullOrWhiteSpace(r.Title) || !string.IsNullOrWhiteSpace(r.Description) || !string.IsNullOrWhiteSpace(r.CanonicalUrl))
                         {
                             <hr class="my-4" />
+
                             <div class="row g-3">
                                 <div class="col-12 col-md-6">
                                     <div class="text-muted small mb-1">Tytuł strony</div>
                                     <div class="fw-semibold">@r.Title</div>
                                 </div>
+
                                 <div class="col-12 col-md-6">
                                     <div class="text-muted small mb-1">Canonical</div>
                                     @if (!string.IsNullOrWhiteSpace(r.CanonicalUrl))
                                     {
                                         <a class="text-break" href="@r.CanonicalUrl" target="_blank" rel="noopener">@r.CanonicalUrl</a>
                                     }
-                                    else { <div class="text-muted">—</div> }
+                                    else
+                                    {
+                                        <div class="text-muted">—</div>
+                                    }
                                 </div>
+
                                 <div class="col-12">
                                     <div class="text-muted small mb-1">Opis</div>
                                     <div>@(string.IsNullOrWhiteSpace(r.Description) ? "—" : r.Description)</div>
@@ -186,6 +294,7 @@
                                     Surowe nagłówki
                                 </button>
                             </h2>
+
                             <div id="c1" class="accordion-collapse collapse" data-bs-parent="#headersAcc">
                                 <div class="accordion-body">
                                     @if ((r.RawHeaders?.Count ?? 0) > 0)
@@ -193,28 +302,29 @@
                                         <div class="mb-2 fw-semibold">Headers</div>
                                         <table class="table table-sm">
                                             <tbody>
-                                            @foreach (var kv in r.RawHeaders!.OrderBy(x => x.Key))
-                                            {
-                                                <tr>
-                                                    <th class="text-nowrap align-top">@kv.Key</th>
-                                                    <td class="text-break">@kv.Value</td>
-                                                </tr>
-                                            }
+                                                @foreach (var kv in r.RawHeaders!.OrderBy(x => x.Key))
+                                                {
+                                                    <tr>
+                                                        <th class="text-nowrap align-top">@kv.Key</th>
+                                                        <td class="text-break">@kv.Value</td>
+                                                    </tr>
+                                                }
                                             </tbody>
                                         </table>
                                     }
+
                                     @if ((r.RawContentHeaders?.Count ?? 0) > 0)
                                     {
                                         <div class="mt-3 mb-2 fw-semibold">Content Headers</div>
                                         <table class="table table-sm">
                                             <tbody>
-                                            @foreach (var kv in r.RawContentHeaders!.OrderBy(x => x.Key))
-                                            {
-                                                <tr>
-                                                    <th class="text-nowrap align-top">@kv.Key</th>
-                                                    <td class="text-break">@kv.Value</td>
-                                                </tr>
-                                            }
+                                                @foreach (var kv in r.RawContentHeaders!.OrderBy(x => x.Key))
+                                                {
+                                                    <tr>
+                                                        <th class="text-nowrap align-top">@kv.Key</th>
+                                                        <td class="text-break">@kv.Value</td>
+                                                    </tr>
+                                                }
                                             </tbody>
                                         </table>
                                     }
@@ -227,6 +337,7 @@
                 <div class="card border-0 shadow-sm mt-4">
                     <div class="card-body">
                         <h3 class="h6 mb-3">Zasoby & przekierowania</h3>
+
                         <div class="row g-3">
                             <div class="col-4">
                                 <div class="p-3 bg-light rounded-3 border text-center">
@@ -234,12 +345,14 @@
                                     <div class="fs-5 fw-bold">@r.LinksCount</div>
                                 </div>
                             </div>
+
                             <div class="col-4">
                                 <div class="p-3 bg-light rounded-3 border text-center">
                                     <div class="text-muted small">Skrypty</div>
                                     <div class="fs-5 fw-bold">@r.ScriptsCount</div>
                                 </div>
                             </div>
+
                             <div class="col-4">
                                 <div class="p-3 bg-light rounded-3 border text-center">
                                     <div class="text-muted small">Obrazy</div>
@@ -268,14 +381,17 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <h3 class="h6 mb-3">Sieć & serwer</h3>
+
                         <div class="mb-2">
                             <div class="text-muted small mb-1">Serwer</div>
                             <div>@(string.IsNullOrWhiteSpace(r.ServerHeader) ? "—" : r.ServerHeader)</div>
                         </div>
+
                         <div class="mb-2">
                             <div class="text-muted small mb-1">X-Powered-By</div>
                             <div>@(string.IsNullOrWhiteSpace(r.XPoweredBy) ? "—" : r.XPoweredBy)</div>
                         </div>
+
                         @if (r.HostIps?.Count > 0)
                         {
                             <div class="mb-2">
@@ -289,10 +405,26 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <h3 class="h6 mb-3">TLS / certyfikat</h3>
-                        <div class="mb-2"><span class="text-muted small">Protokół:</span> <b>@r.TlsProtocol</b></div>
-                        <div class="mb-2"><span class="text-muted small">Wystawca:</span> <span class="small">@r.CertIssuer</span></div>
-                        <div class="mb-2"><span class="text-muted small">Podmiot:</span> <span class="small">@r.CertSubject</span></div>
-                        <div class="mb-0"><span class="text-muted small">Ważny do:</span> <b>@r.CertNotAfter?.ToString("yyyy-MM-dd")</b>
+
+                        <div class="mb-2">
+                            <span class="text-muted small">Protokół:</span>
+                            <b>@r.TlsProtocol</b>
+                        </div>
+
+                        <div class="mb-2">
+                            <span class="text-muted small">Wystawca:</span>
+                            <span class="small">@r.CertIssuer</span>
+                        </div>
+
+                        <div class="mb-2">
+                            <span class="text-muted small">Podmiot:</span>
+                            <span class="small">@r.CertSubject</span>
+                        </div>
+
+                        <div class="mb-0">
+                            <span class="text-muted small">Ważny do:</span>
+                            <b>@r.CertNotAfter?.ToString("yyyy-MM-dd")</b>
+
                             @if (r.CertDaysToExpiry.HasValue)
                             {
                                 <span class="small text-muted">(@r.CertDaysToExpiry dni)</span>
@@ -304,17 +436,33 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
                         <h3 class="h6 mb-3">Nagłówki bezpieczeństwa</h3>
+
                         @{
                             var h = r.Headers ?? new LinkScannerApp.Models.SecurityHeaders();
-                            Func<bool, string> mark = ok => ok ? "<span class='text-success'><i class='bi bi-shield-check'></i> TAK</span>" : "<span class='text-danger'><i class='bi bi-shield-exclamation'></i> NIE</span>";
+                            Func<bool, string> mark = ok => ok
+                                ? "<span class='text-success'><i class='bi bi-shield-check'></i> TAK</span>"
+                                : "<span class='text-danger'><i class='bi bi-shield-exclamation'></i> NIE</span>";
                         }
+
                         <ul class="list-unstyled small mb-0">
-                            <li class="mb-1 d-flex justify-content-between"><span>CSP</span> @Html.Raw(mark(h.HasCSP))</li>
-                            <li class="mb-1 d-flex justify-content-between"><span>HSTS</span> @Html.Raw(mark(h.HasHSTS))</li>
-                            <li class="mb-1 d-flex justify-content-between"><span>X-Frame-Options</span> @Html.Raw(mark(h.HasXFO))</li>
-                            <li class="mb-1 d-flex justify-content-between"><span>X-Content-Type-Options</span> @Html.Raw(mark(h.HasXCTO))</li>
-                            <li class="mb-1 d-flex justify-content-between"><span>Referrer-Policy</span> @Html.Raw(mark(h.HasReferrerPolicy))</li>
-                            <li class="mb-1 d-flex justify-content-between"><span>Permissions-Policy</span> @Html.Raw(mark(h.HasPermissionsPolicy))</li>
+                            <li class="mb-1 d-flex justify-content-between">
+                                <span>CSP</span> @Html.Raw(mark(h.HasCSP))
+                            </li>
+                            <li class="mb-1 d-flex justify-content-between">
+                                <span>HSTS</span> @Html.Raw(mark(h.HasHSTS))
+                            </li>
+                            <li class="mb-1 d-flex justify-content-between">
+                                <span>X-Frame-Options</span> @Html.Raw(mark(h.HasXFO))
+                            </li>
+                            <li class="mb-1 d-flex justify-content-between">
+                                <span>X-Content-Type-Options</span> @Html.Raw(mark(h.HasXCTO))
+                            </li>
+                            <li class="mb-1 d-flex justify-content-between">
+                                <span>Referrer-Policy</span> @Html.Raw(mark(h.HasReferrerPolicy))
+                            </li>
+                            <li class="mb-1 d-flex justify-content-between">
+                                <span>Permissions-Policy</span> @Html.Raw(mark(h.HasPermissionsPolicy))
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -328,71 +476,80 @@
                 <div class="toast-body">
                     Zapisano do historii ✅
                 </div>
+
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
     </div>
 }
 
-
-
 @section Scripts {
-<script>
-    (function () {
-        'use strict';
-        const form = document.getElementById('scanForm');
-        const btn = document.getElementById('scanBtn');
-        form.addEventListener('submit', function (e) {
-            if (!form.checkValidity()) {
-                e.preventDefault();
-                e.stopPropagation();
-            } else {
-                btn.querySelector('.btn-text').classList.add('d-none');
-                btn.querySelector('.btn-spinner').classList.remove('d-none');
-                btn.setAttribute('disabled', 'disabled');
+    <script>
+        (function () {
+            'use strict';
+
+            const form = document.getElementById('scanForm');
+            const btn = document.getElementById('scanBtn');
+
+            if (!form || !btn) {
+                return;
             }
-            form.classList.add('was-validated');
-        }, false);
 
-        document.querySelectorAll('.sample-url').forEach(el => {
-            el.addEventListener('click', () => {
-                const u = el.getAttribute('data-url');
-                const input = document.getElementById('Url');
-                input.value = u;
-                input.focus();
-            });
-        });
-    })();
-</script>
+            form.addEventListener('submit', function (e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                } else {
+                    btn.querySelector('.btn-text')?.classList.add('d-none');
+                    btn.querySelector('.btn-spinner')?.classList.remove('d-none');
+                    btn.setAttribute('disabled', 'disabled');
+                }
 
-@if (Model.Result is not null) 
-{
-<script>
-    (function () {
-        const key = 'scanHistory';
-        const maxItems = 200;
+                form.classList.add('was-validated');
+            }, false);
+        })();
+    </script>
 
-        let history = [];
-        try { 
-            history = JSON.parse(sessionStorage.getItem(key) || '[]'); 
-        } catch { 
-            history = []; 
-        }
+    @if (Model.Result is not null)
+    {
+        <script>
+            (function () {
+                const key = 'scanHistory';
+                const maxItems = 200;
 
-        const result = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Result));
-        result.scannedAt = new Date().toISOString();
+                let history = [];
 
-        history.unshift(result);
-        if (history.length > maxItems) history = history.slice(0, maxItems);
-        sessionStorage.setItem(key, JSON.stringify(history));
+                try {
+                    history = JSON.parse(sessionStorage.getItem(key) || '[]');
+                } catch {
+                    history = [];
+                }
 
-        const el = document.getElementById('historyCount');
+                const result = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Result));
+                result.scannedAt = new Date().toISOString();
 
-        if (el) { 
-            el.textContent = history.length; 
-            el.classList.remove('d-none'); 
-        }
-  })();
-</script>
-}
+                history.unshift(result);
+
+                if (history.length > maxItems) {
+                    history = history.slice(0, maxItems);
+                }
+
+                sessionStorage.setItem(key, JSON.stringify(history));
+
+                const el = document.getElementById('historyCount');
+
+                if (el) {
+                    el.textContent = history.length;
+                    el.classList.remove('d-none');
+                }
+
+                const toastEl = document.getElementById('saveToast');
+
+                if (toastEl && window.bootstrap) {
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                }
+            })();
+        </script>
+    }
 }

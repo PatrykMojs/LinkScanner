@@ -102,3 +102,4 @@ C:\Users\patry\OneDrive\Pulpit\LinkScanner\LinkScannerApp\obj\Debug\net8.0\refin
 C:\Users\patry\OneDrive\Pulpit\LinkScanner\LinkScannerApp\obj\Debug\net8.0\LinkScannerApp.pdb
 C:\Users\patry\OneDrive\Pulpit\LinkScanner\LinkScannerApp\obj\Debug\net8.0\LinkScannerApp.genruntimeconfig.cache
 C:\Users\patry\OneDrive\Pulpit\LinkScanner\LinkScannerApp\obj\Debug\net8.0\ref\LinkScannerApp.dll
+C:\Users\patry\OneDrive\Pulpit\LinkScanner\LinkScannerApp\obj\Debug\net8.0\LinkScannerApp.sourcelink.json
