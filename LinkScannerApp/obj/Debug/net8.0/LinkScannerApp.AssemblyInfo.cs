@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LinkScannerApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2899533212f0c05cef07c8372e0e9fe5f07cff34")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5d34368602c18d4d96327c6a8699bf20754dc307")]
 [assembly: System.Reflection.AssemblyProductAttribute("LinkScannerApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LinkScannerApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
