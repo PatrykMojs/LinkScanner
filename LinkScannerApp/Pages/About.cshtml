@@ -4,19 +4,72 @@
     ViewData["Title"] = "O projekcie";
 }
 
-<h1>O projekcie</h1>
+<section class="policy-page">
+    <div class="policy-header">
+        <div class="policy-header-icon">
+            <i class="bi bi-info-circle"></i>
+        </div>
+        <div>
+            <span class="policy-kicker">Poznaj aplikację</span>
+            <h1>O projekcie</h1>
+            <p>
+                LinkScanner to prosta aplikacja internetowa służąca do wstępnej analizy linków.
+                Jej celem jest pomoc użytkownikowi w ocenie, czy dana strona może wyglądać podejrzanie.
+            </p>
+        </div>
+    </div>
 
-<p>
-    LinkScanner to prosta aplikacja internetowa służąca do wstępnej analizy linków.
-    Jej celem jest pomoc użytkownikowi w ocenie, czy dana strona może wyglądać podejrzanie.
-</p>
+    <div class="policy-alert">
+        <i class="bi bi-shield-check"></i>
+        <div>
+            Projekt został stworzony jako narzędzie pomocnicze, które w szybki sposób
+            pozwala sprawdzić podstawowe techniczne wskaźniki bezpieczeństwa strony internetowej.
+        </div>
+    </div>
 
-<p>
-    Aplikacja analizuje między innymi protokół HTTPS, przekierowania, podstawowe nagłówki bezpieczeństwa,
-    certyfikat TLS, metadane strony oraz wybrane elementy techniczne.
-</p>
+    <div class="policy-grid">
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <h2>Cel aplikacji</h2>
+            </div>
 
-<p>
-    Wynik skanowania ma charakter orientacyjny i nie stanowi gwarancji pełnego bezpieczeństwa strony.
-    Zawsze zachowaj ostrożność przed podaniem danych logowania, danych karty płatniczej lub innych danych osobowych.
-</p>
+            <p class="mb-0">
+                LinkScanner pomaga użytkownikowi w ocenie, czy podany link może prowadzić
+                do strony wyglądającej podejrzanie lub wymagającej dodatkowej ostrożności.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h2>Co analizuje aplikacja?</h2>
+            </div>
+
+            <p class="mb-0">
+                Aplikacja analizuje między innymi protokół HTTPS, przekierowania,
+                podstawowe nagłówki bezpieczeństwa, certyfikat TLS, metadane strony
+                oraz wybrane elementy techniczne.
+            </p>
+        </article>
+
+        <article class="policy-card policy-card-full">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h2>Ważna informacja</h2>
+            </div>
+
+            <p class="mb-0">
+                Wynik skanowania ma charakter orientacyjny i nie stanowi gwarancji pełnego
+                bezpieczeństwa strony. Zawsze zachowaj ostrożność przed podaniem danych logowania,
+                danych karty płatniczej lub innych danych osobowych.
+            </p>
+        </article>
+    </div>
+</section>

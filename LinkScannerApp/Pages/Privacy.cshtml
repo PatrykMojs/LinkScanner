@@ -4,44 +4,109 @@
     ViewData["Title"] = "Polityka prywatności";
 }
 
-<h1>Polityka prywatności</h1>
+<section class="policy-page">
+    <div class="policy-header">
+        <div class="policy-header-icon">
+            <i class="bi bi-shield-lock"></i>
+        </div>
+        <div>
+            <span class="policy-kicker">Bezpieczeństwo i prywatność</span>
+            <h1>Polityka prywatności</h1>
+            <p>
+                Dbamy o przejrzystość działania aplikacji LinkScanner.
+                Poniżej znajdziesz informacje o tym, jakie dane są przetwarzane
+                i w jaki sposób działa aplikacja.
+            </p>
+        </div>
+    </div>
 
-<p>
-    Niniejsza polityka prywatności opisuje sposób działania aplikacji LinkScanner.
-</p>
+    <div class="policy-alert">
+        <i class="bi bi-info-circle"></i>
+        <div>
+            LinkScanner nie wymaga zakładania konta i nie zbiera bezpośrednio danych osobowych
+            użytkownika wyłącznie po to, aby wykonać podstawowe skanowanie linku.
+        </div>
+    </div>
 
-<h2>Jakie dane są przetwarzane?</h2>
+    <div class="policy-grid">
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-link-45deg"></i>
+                </div>
+                <h2>Jakie dane są przetwarzane?</h2>
+            </div>
 
-<p>
-    Aplikacja przetwarza adres URL podany przez użytkownika w celu wykonania analizy bezpieczeństwa.
-</p>
+            <p>
+                Aplikacja przetwarza adres URL podany przez użytkownika w celu wykonania analizy bezpieczeństwa.
+            </p>
 
-<p>
-    LinkScanner nie wymaga zakładania konta i nie pobiera bezpośrednio danych osobowych użytkownika.
-</p>
+            <p class="mb-0">
+                LinkScanner nie wymaga zakładania konta i nie pobiera bezpośrednio danych osobowych użytkownika.
+            </p>
+        </article>
 
-<h2>Historia skanowania</h2>
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h2>Historia skanowania</h2>
+            </div>
 
-<p>
-    Historia skanowania może być przechowywana lokalnie w przeglądarce użytkownika, na przykład przy użyciu mechanizmu
-    sessionStorage. Dane te nie są trwałą bazą danych aplikacji i mogą zostać usunięte po zamknięciu sesji przeglądarki.
-</p>
+            <p>
+                Historia skanowania może być przechowywana lokalnie w przeglądarce użytkownika,
+                na przykład przy użyciu mechanizmu <code>sessionStorage</code>.
+            </p>
 
-<h2>Pliki cookies</h2>
+            <p class="mb-0">
+                Dane te nie są trwałą bazą danych aplikacji i mogą zostać usunięte po zamknięciu sesji przeglądarki.
+            </p>
+        </article>
 
-<p>
-    Aplikacja może korzystać z technicznych plików cookies lub podobnych mechanizmów, jeżeli są one wymagane do prawidłowego działania strony.
-</p>
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon purple">
+                    <i class="bi bi-cookie"></i>
+                </div>
+                <h2>Pliki cookies</h2>
+            </div>
 
-<h2>Reklamy</h2>
+            <p class="mb-0">
+                Aplikacja może korzystać z technicznych plików cookies lub podobnych mechanizmów,
+                jeżeli są one wymagane do prawidłowego działania strony.
+            </p>
+        </article>
 
-<p>
-    W przyszłości aplikacja może wyświetlać reklamy zewnętrznych dostawców, takich jak Google AdSense.
-    Dostawcy reklam mogą używać plików cookies zgodnie z własnymi zasadami prywatności.
-</p>
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-badge-ad"></i>
+                </div>
+                <h2>Reklamy</h2>
+            </div>
 
-<h2>Kontakt</h2>
+            <p>
+                W przyszłości aplikacja może wyświetlać reklamy zewnętrznych dostawców,
+                takich jak Google AdSense.
+            </p>
 
-<p>
-    W sprawach związanych z prywatnością możesz skontaktować się z administratorem strony.
-</p>
+            <p class="mb-0">
+                Dostawcy reklam mogą używać plików cookies zgodnie z własnymi zasadami prywatności.
+            </p>
+        </article>
+
+        <article class="policy-card policy-card-full">
+            <div class="policy-card-head">
+                <div class="policy-card-icon cyan">
+                    <i class="bi bi-envelope"></i>
+                </div>
+                <h2>Kontakt</h2>
+            </div>
+
+            <p class="mb-0">
+                W sprawach związanych z prywatnością możesz skontaktować się z administratorem strony.
+            </p>
+        </article>
+    </div>
+</section>
