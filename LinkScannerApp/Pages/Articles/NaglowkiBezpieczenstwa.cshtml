@@ -1,0 +1,98 @@
+@page
+@model LinkScannerApp.Pages.Articles.NaglowkiBezpieczenstwaModel
+@{
+    ViewData["Title"] = "Co to są nagłówki bezpieczeństwa?";
+}
+
+<section class="policy-page">
+    <div class="policy-header">
+        <div class="policy-header-icon">
+            <i class="bi bi-hdd-network"></i>
+        </div>
+        <div>
+            <span class="policy-kicker">Nagłówki HTTP</span>
+            <h1>Co to są nagłówki bezpieczeństwa?</h1>
+            <p>
+                Nagłówki bezpieczeństwa to instrukcje wysyłane przez stronę do przeglądarki.
+                Pomagają ograniczyć część popularnych ataków i poprawiają konfigurację bezpieczeństwa witryny.
+            </p>
+        </div>
+    </div>
+
+    <div class="policy-alert">
+        <i class="bi bi-info-circle"></i>
+        <div>
+            Brak pojedynczego nagłówka nie oznacza automatycznie, że strona jest fałszywa.
+            Może jednak świadczyć o słabszej konfiguracji bezpieczeństwa.
+        </div>
+    </div>
+
+    <div class="policy-grid">
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-file-lock"></i>
+                </div>
+                <h2>Content-Security-Policy</h2>
+            </div>
+            <p class="mb-0">
+                CSP pomaga określić, z jakich źródeł przeglądarka może ładować skrypty, style, obrazy
+                i inne zasoby. Dobrze ustawiony CSP może zmniejszyć ryzyko niektórych ataków typu XSS.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-lock"></i>
+                </div>
+                <h2>Strict-Transport-Security</h2>
+            </div>
+            <p class="mb-0">
+                HSTS informuje przeglądarkę, że strona powinna być odwiedzana wyłącznie przez HTTPS.
+                To pomaga ograniczyć ryzyko przypadkowego użycia nieszyfrowanego połączenia.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon purple">
+                    <i class="bi bi-window-sidebar"></i>
+                </div>
+                <h2>X-Frame-Options</h2>
+            </div>
+            <p class="mb-0">
+                X-Frame-Options może blokować osadzanie strony w ramkach na innych witrynach.
+                To pomaga ograniczać ataki typu clickjacking.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-shield-plus"></i>
+                </div>
+                <h2>Inne przydatne nagłówki</h2>
+            </div>
+            <p class="mb-0">
+                Do często spotykanych nagłówków należą też X-Content-Type-Options,
+                Referrer-Policy oraz Permissions-Policy. Każdy z nich odpowiada za inny fragment
+                zachowania przeglądarki.
+            </p>
+        </article>
+
+        <article class="policy-card policy-card-full">
+            <div class="policy-card-head">
+                <div class="policy-card-icon cyan">
+                    <i class="bi bi-journal-bookmark"></i>
+                </div>
+                <h2>Źródła i dalsza lektura</h2>
+            </div>
+            <ul class="mb-0">
+                <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy" target="_blank" rel="noopener">MDN Web Docs – Content-Security-Policy</a></li>
+                <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options" target="_blank" rel="noopener">MDN Web Docs – X-Frame-Options</a></li>
+                <li><a href="https://web.dev/articles/security-headers" target="_blank" rel="noopener">web.dev – Security headers quick reference</a></li>
+            </ul>
+        </article>
+    </div>
+</section>

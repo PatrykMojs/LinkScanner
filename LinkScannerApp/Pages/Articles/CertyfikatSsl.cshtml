@@ -1,0 +1,88 @@
+@page
+@model LinkScannerApp.Pages.Articles.CertyfikatSslModel
+@{
+    ViewData["Title"] = "Dlaczego certyfikat SSL jest ważny?";
+}
+
+<section class="policy-page">
+    <div class="policy-header">
+        <div class="policy-header-icon">
+            <i class="bi bi-patch-check"></i>
+        </div>
+        <div>
+            <span class="policy-kicker">SSL / TLS</span>
+            <h1>Dlaczego certyfikat SSL jest ważny?</h1>
+            <p>
+                Certyfikat SSL/TLS jest jednym z elementów, które pozwalają stronie działać przez HTTPS.
+                Dzięki niemu przeglądarka może zestawić szyfrowane połączenie z serwerem.
+            </p>
+        </div>
+    </div>
+
+    <div class="policy-alert">
+        <i class="bi bi-exclamation-circle"></i>
+        <div>
+            Certyfikat SSL jest ważny, ale nie jest dowodem uczciwości właściciela strony.
+            Fałszywa strona również może posiadać certyfikat i działać przez HTTPS.
+        </div>
+    </div>
+
+    <div class="policy-grid">
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-lock"></i>
+                </div>
+                <h2>Co daje certyfikat?</h2>
+            </div>
+            <p class="mb-0">
+                Certyfikat umożliwia szyfrowanie połączenia między przeglądarką a serwerem.
+                Dzięki temu dane przesyłane do strony są trudniejsze do podejrzenia lub zmodyfikowania po drodze.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <h2>Data ważności</h2>
+            </div>
+            <p class="mb-0">
+                Certyfikat ma określony termin ważności. Jeżeli jest wygasły, przeglądarka może pokazać ostrzeżenie.
+                W takiej sytuacji nie powinno się podawać na stronie danych.
+            </p>
+        </article>
+
+        <article class="policy-card policy-card-full">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-shield-exclamation"></i>
+                </div>
+                <h2>SSL nie oznacza pełnego bezpieczeństwa</h2>
+            </div>
+            <p>
+                HTTPS i certyfikat chronią połączenie, ale nie mówią wszystkiego o zamiarach właściciela strony.
+                Oszust może stworzyć stronę z certyfikatem, która wygląda jak panel banku, sklep lub bramka płatności.
+            </p>
+            <p class="mb-0">
+                Dlatego oprócz certyfikatu zawsze sprawdzaj adres domeny, treść strony, przekierowania oraz to,
+                czy strona nie wywołuje presji typu „zapłać natychmiast” albo „konto zostanie zablokowane”.
+            </p>
+        </article>
+
+        <article class="policy-card policy-card-full">
+            <div class="policy-card-head">
+                <div class="policy-card-icon cyan">
+                    <i class="bi bi-journal-bookmark"></i>
+                </div>
+                <h2>Źródła i dalsza lektura</h2>
+            </div>
+            <ul class="mb-0">
+                <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/TLS" target="_blank" rel="noopener">MDN Web Docs – TLS</a></li>
+                <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/HTTPS" target="_blank" rel="noopener">MDN Web Docs – HTTPS</a></li>
+                <li><a href="https://letsencrypt.org/docs/" target="_blank" rel="noopener">Let’s Encrypt – dokumentacja</a></li>
+            </ul>
+        </article>
+    </div>
+</section>

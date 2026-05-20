@@ -24,6 +24,30 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWJvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/patry/OneDrive/Pulpit/LinkScanner/LinkScannerApp/Pages/Articles/BrakHttps.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXJ0aWNsZXNcQnJha0h0dHBzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/patry/OneDrive/Pulpit/LinkScanner/LinkScannerApp/Pages/Articles/CertyfikatSsl.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXJ0aWNsZXNcQ2VydHlmaWthdFNzbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/patry/OneDrive/Pulpit/LinkScanner/LinkScannerApp/Pages/Articles/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXJ0aWNsZXNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/patry/OneDrive/Pulpit/LinkScanner/LinkScannerApp/Pages/Articles/JakSprawdzicCzyStronaJestBezpieczna.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXJ0aWNsZXNcSmFrU3ByYXdkemljQ3p5U3Ryb25hSmVzdEJlenBpZWN6bmEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/patry/OneDrive/Pulpit/LinkScanner/LinkScannerApp/Pages/Articles/NaglowkiBezpieczenstwa.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXJ0aWNsZXNcTmFnbG93a2lCZXpwaWVjemVuc3R3YS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/patry/OneDrive/Pulpit/LinkScanner/LinkScannerApp/Pages/Articles/PrzekierowaniaStrony.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXJ0aWNsZXNcUHJ6ZWtpZXJvd2FuaWFTdHJvbnkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/patry/OneDrive/Pulpit/LinkScanner/LinkScannerApp/Pages/Contact.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ29udGFjdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 

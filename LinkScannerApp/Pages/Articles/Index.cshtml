@@ -1,0 +1,111 @@
+@page
+@model LinkScannerApp.Pages.Articles.IndexModel
+@{
+    ViewData["Title"] = "Baza wiedzy";
+}
+
+<section class="policy-page">
+    <div class="policy-header">
+        <div class="policy-header-icon">
+            <i class="bi bi-journal-text"></i>
+        </div>
+        <div>
+            <span class="policy-kicker">Baza wiedzy</span>
+            <h1>Bezpieczeństwo stron internetowych</h1>
+            <p>
+                Krótkie poradniki, które pomagają zrozumieć wynik skanowania linku
+                i świadomie ocenić, czy dana strona wygląda bezpiecznie.
+            </p>
+        </div>
+    </div>
+
+    <div class="policy-alert">
+        <i class="bi bi-lightbulb"></i>
+        <div>
+            LinkScanner pokazuje wynik techniczny, ale ostateczna decyzja zawsze należy do użytkownika.
+            Poniższe artykuły pomogą Ci lepiej interpretować sygnały ostrzegawcze.
+        </div>
+    </div>
+
+    <div class="policy-grid">
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h2>Jak sprawdzić, czy strona jest bezpieczna?</h2>
+            </div>
+            <p>
+                Poznaj podstawowe elementy, na które warto zwrócić uwagę przed wejściem na stronę,
+                logowaniem lub podaniem danych.
+            </p>
+            <a class="btn btn-primary btn-sm" asp-page="/Articles/JakSprawdzicCzyStronaJestBezpieczna">
+                Czytaj artykuł
+            </a>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-unlock"></i>
+                </div>
+                <h2>Co oznacza brak HTTPS?</h2>
+            </div>
+            <p>
+                Wyjaśniamy, dlaczego połączenie bez HTTPS może być ryzykowne
+                i kiedy szczególnie należy uważać.
+            </p>
+            <a class="btn btn-primary btn-sm" asp-page="/Articles/BrakHttps">
+                Czytaj artykuł
+            </a>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon purple">
+                    <i class="bi bi-arrow-left-right"></i>
+                </div>
+                <h2>Jak sprawdzić przekierowania strony?</h2>
+            </div>
+            <p>
+                Dowiedz się, kiedy przekierowanie jest normalne, a kiedy może oznaczać próbę ukrycia
+                prawdziwego adresu.
+            </p>
+            <a class="btn btn-primary btn-sm" asp-page="/Articles/PrzekierowaniaStrony">
+                Czytaj artykuł
+            </a>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-hdd-network"></i>
+                </div>
+                <h2>Co to są nagłówki bezpieczeństwa?</h2>
+            </div>
+            <p>
+                Proste wyjaśnienie nagłówków HTTP, takich jak CSP, HSTS czy X-Frame-Options,
+                bez technicznego żargonu.
+            </p>
+            <a class="btn btn-primary btn-sm" asp-page="/Articles/NaglowkiBezpieczenstwa">
+                Czytaj artykuł
+            </a>
+        </article>
+
+        <article class="policy-card policy-card-full">
+            <div class="policy-card-head">
+                <div class="policy-card-icon cyan">
+                    <i class="bi bi-patch-check"></i>
+                </div>
+                <h2>Dlaczego certyfikat SSL jest ważny?</h2>
+            </div>
+            <p>
+                Certyfikat SSL/TLS pomaga szyfrować połączenie, ale sam w sobie nie oznacza,
+                że właściciel strony jest uczciwy. Wyjaśniamy różnicę.
+            </p>
+            <a class="btn btn-primary btn-sm" asp-page="/Articles/CertyfikatSsl">
+                Czytaj artykuł
+            </a>
+        </article>
+    </div>
+</section>
