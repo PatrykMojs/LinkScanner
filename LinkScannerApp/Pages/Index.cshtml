@@ -159,11 +159,97 @@
         code.Value is >= 400 and < 500 ? "bg-warning text-dark" : "bg-danger";
 
     var risk = Math.Clamp(r.RiskScore, 0, 100);
-    string RiskBarClass(int v) => v <= 30 ? "bg-success" : v <= 60 ? "bg-warning text-dark" : "bg-danger";
 
-    var safeBadge = r.IsSafe
-        ? "<span class=\"badge bg-success\"><i class=\"bi bi-check-circle\"></i> Bezpieczny</span>"
-        : "<span class=\"badge bg-danger\"><i class=\"bi bi-exclamation-octagon\"></i> Niebezpieczny</span>";
+    string RiskBarClass(int v) =>
+        v <= 30 ? "bg-success" :
+        v <= 60 ? "bg-warning text-dark" :
+        "bg-danger";
+
+    var verdictClass = risk <= 30 && r.IsSafe
+        ? "safe"
+        : risk <= 60
+            ? "warning"
+            : "danger";
+
+    var verdictTitle = verdictClass switch
+    {
+        "safe" => "Link wygląda bezpiecznie",
+        "warning" => "Zachowaj ostrożność",
+        _ => "Link wygląda podejrzanie"
+    };
+
+    var verdictIcon = verdictClass switch
+    {
+        "safe" => "bi-shield-check",
+        "warning" => "bi-exclamation-triangle",
+        _ => "bi-shield-exclamation"
+    };
+
+    var verdictDescription = verdictClass switch
+    {
+        "safe" => "Nie wykryliśmy krytycznych problemów. Mimo to zachowaj ostrożność przed podaniem danych logowania, danych osobowych lub danych płatniczych.",
+        "warning" => "Strona nie wygląda jednoznacznie niebezpiecznie, ale wykryto elementy wymagające uwagi. Przed podaniem danych sprawdź adres strony bardzo dokładnie.",
+        _ => "Wykryto istotne sygnały ryzyka. Nie podawaj na tej stronie danych logowania, danych osobowych ani danych płatniczych."
+    };
+
+    var reasons = new List<(string Text, string Type)>();
+
+    if (r.StatusCode is >= 200 and < 400)
+    {
+        reasons.Add(("Strona odpowiada poprawnie.", "ok"));
+    }
+    else if (r.StatusCode.HasValue)
+    {
+        reasons.Add(($"Strona zwraca nietypowy status HTTP: {r.StatusCode}.", "bad"));
+    }
+    else
+    {
+        reasons.Add(("Nie udało się jednoznacznie odczytać statusu HTTP.", "warn"));
+    }
+
+    if (!string.IsNullOrWhiteSpace(r.TlsProtocol) && r.TlsProtocol != "—")
+    {
+        reasons.Add(("Połączenie korzysta z TLS/HTTPS.", "ok"));
+    }
+    else
+    {
+        reasons.Add(("Nie udało się potwierdzić poprawnego połączenia TLS/HTTPS.", "bad"));
+    }
+
+    if (r.CertDaysToExpiry.HasValue && r.CertDaysToExpiry.Value > 30)
+    {
+        reasons.Add(("Certyfikat wygląda na aktualny.", "ok"));
+    }
+    else if (r.CertDaysToExpiry.HasValue && r.CertDaysToExpiry.Value > 0)
+    {
+        reasons.Add(("Certyfikat wygasa niedługo. Warto zachować ostrożność.", "warn"));
+    }
+    else if (r.CertDaysToExpiry.HasValue)
+    {
+        reasons.Add(("Certyfikat wygląda na wygasły.", "bad"));
+    }
+
+    if (r.RedirectChain?.Count > 0)
+    {
+        reasons.Add(($"Wykryto {r.RedirectChain.Count} przekierowań. Sprawdź, czy końcowy adres nadal wygląda zaufanie.", "warn"));
+    }
+    else
+    {
+        reasons.Add(("Nie wykryto łańcucha przekierowań.", "ok"));
+    }
+
+    if (risk <= 30)
+    {
+        reasons.Add(("Ogólny wynik ryzyka jest niski.", "ok"));
+    }
+    else if (risk <= 60)
+    {
+        reasons.Add(("Ogólny wynik ryzyka jest średni.", "warn"));
+    }
+    else
+    {
+        reasons.Add(("Ogólny wynik ryzyka jest podwyższony.", "bad"));
+    }
 
     string? favicon = r.FaviconUrl;
     try
@@ -177,310 +263,401 @@
     }
     catch { }
 
-    <section class="mt-4">
-        <div class="row g-4">
-            <div class="col-12 col-lg-8">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h2 class="h5 mb-0">Wynik skanowania</h2>
-                            @Html.Raw(safeBadge)
-                        </div>
-
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            @if (!string.IsNullOrWhiteSpace(favicon))
-                            {
-                                <img src="@favicon" alt="favicon" width="24" height="24" class="rounded border" />
-                            }
-
-                            <a class="link-primary text-break" href="@r.Url" target="_blank" rel="noopener">
-                                @r.Url <i class="bi bi-box-arrow-up-right ms-1"></i>
-                            </a>
-                        </div>
-
-                        <div class="row g-3">
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 rounded-3 border text-center">
-                                    <div class="text-muted small">HTTP</div>
-                                    <span class="badge @StatusBadgeClass(r.StatusCode)">@r.StatusCode</span>
-                                    <div class="small text-muted mt-1">v@r.HttpVersion</div>
-                                </div>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 bg-light rounded-3 border text-center">
-                                    <div class="text-muted small">TTFB</div>
-                                    <div class="fw-semibold">@(r.TtfbMs?.ToString() ?? "—") ms</div>
-                                </div>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 bg-light rounded-3 border text-center">
-                                    <div class="text-muted small">Pobranie</div>
-                                    <div class="fw-semibold">@(r.LoadTime?.TotalMilliseconds.ToString("0") ?? "—") ms</div>
-                                </div>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 bg-light rounded-3 border text-center">
-                                    <div class="text-muted small">HTML</div>
-                                    @{
-                                        var kb = r.HtmlBytes.HasValue ? (r.HtmlBytes.Value / 1024d) : (double?)null;
-                                    }
-                                    <div class="fw-semibold">@(kb.HasValue ? $"{kb.Value:0.0} KB" : "—")</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-2">
-                            <div class="col-12 col-md-6">
-                                <div class="p-3 bg-light rounded-3 border">
-                                    <div class="text-muted small mb-1">Content-Type</div>
-                                    <div class="fw-semibold">@r.ContentType</div>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div>
-                                    <div class="d-flex justify-content-between">
-                                        <div class="text-muted small">RiskScore</div>
-                                        <div class="small fw-semibold">@risk/100</div>
-                                    </div>
-
-                                    <div class="progress" role="progressbar" aria-valuenow="@risk" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar @RiskBarClass(risk)" style="width:@risk%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        @if (!string.IsNullOrWhiteSpace(r.Title) || !string.IsNullOrWhiteSpace(r.Description) || !string.IsNullOrWhiteSpace(r.CanonicalUrl))
-                        {
-                            <hr class="my-4" />
-
-                            <div class="row g-3">
-                                <div class="col-12 col-md-6">
-                                    <div class="text-muted small mb-1">Tytuł strony</div>
-                                    <div class="fw-semibold">@r.Title</div>
-                                </div>
-
-                                <div class="col-12 col-md-6">
-                                    <div class="text-muted small mb-1">Canonical</div>
-                                    @if (!string.IsNullOrWhiteSpace(r.CanonicalUrl))
-                                    {
-                                        <a class="text-break" href="@r.CanonicalUrl" target="_blank" rel="noopener">@r.CanonicalUrl</a>
-                                    }
-                                    else
-                                    {
-                                        <div class="text-muted">—</div>
-                                    }
-                                </div>
-
-                                <div class="col-12">
-                                    <div class="text-muted small mb-1">Opis</div>
-                                    <div>@(string.IsNullOrWhiteSpace(r.Description) ? "—" : r.Description)</div>
-                                </div>
-                            </div>
-                        }
-                    </div>
+    <section class="scan-result-summary mt-4">
+        <div class="verdict-card @verdictClass">
+            <div class="verdict-main">
+                <div class="verdict-icon">
+                    <i class="bi @verdictIcon"></i>
                 </div>
 
-                @if ((r.RawHeaders?.Count ?? 0) > 0 || (r.RawContentHeaders?.Count ?? 0) > 0)
-                {
-                    <div class="accordion" id="headersAcc">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="h1">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c1">
-                                    Surowe nagłówki
-                                </button>
-                            </h2>
+                <div>
+                    <div class="verdict-label">Wynik skanowania</div>
+                    <h2>@verdictTitle</h2>
+                    <p>@verdictDescription</p>
 
-                            <div id="c1" class="accordion-collapse collapse" data-bs-parent="#headersAcc">
-                                <div class="accordion-body">
-                                    @if ((r.RawHeaders?.Count ?? 0) > 0)
-                                    {
-                                        <div class="mb-2 fw-semibold">Headers</div>
-                                        <table class="table table-sm">
-                                            <tbody>
-                                                @foreach (var kv in r.RawHeaders!.OrderBy(x => x.Key))
-                                                {
-                                                    <tr>
-                                                        <th class="text-nowrap align-top">@kv.Key</th>
-                                                        <td class="text-break">@kv.Value</td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    }
-
-                                    @if ((r.RawContentHeaders?.Count ?? 0) > 0)
-                                    {
-                                        <div class="mt-3 mb-2 fw-semibold">Content Headers</div>
-                                        <table class="table table-sm">
-                                            <tbody>
-                                                @foreach (var kv in r.RawContentHeaders!.OrderBy(x => x.Key))
-                                                {
-                                                    <tr>
-                                                        <th class="text-nowrap align-top">@kv.Key</th>
-                                                        <td class="text-break">@kv.Value</td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-
-                <div class="card border-0 shadow-sm mt-4">
-                    <div class="card-body">
-                        <h3 class="h6 mb-3">Zasoby & przekierowania</h3>
-
-                        <div class="row g-3">
-                            <div class="col-4">
-                                <div class="p-3 bg-light rounded-3 border text-center">
-                                    <div class="text-muted small">Linki</div>
-                                    <div class="fs-5 fw-bold">@r.LinksCount</div>
-                                </div>
-                            </div>
-
-                            <div class="col-4">
-                                <div class="p-3 bg-light rounded-3 border text-center">
-                                    <div class="text-muted small">Skrypty</div>
-                                    <div class="fs-5 fw-bold">@r.ScriptsCount</div>
-                                </div>
-                            </div>
-
-                            <div class="col-4">
-                                <div class="p-3 bg-light rounded-3 border text-center">
-                                    <div class="text-muted small">Obrazy</div>
-                                    <div class="fs-5 fw-bold">@r.ImageCount</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        @if (r.RedirectChain?.Count > 0)
+                    <a class="verdict-url" href="@r.Url" target="_blank" rel="noopener">
+                        @if (!string.IsNullOrWhiteSpace(favicon))
                         {
-                            <div class="mt-3">
-                                <div class="text-muted small mb-1">Łańcuch przekierowań</div>
-                                <ul class="small mb-0">
-                                    @foreach (var hop in r.RedirectChain)
-                                    {
-                                        <li>@hop</li>
-                                    }
-                                </ul>
-                            </div>
+                            <img src="@favicon" alt="favicon" width="20" height="20" class="rounded border me-1" />
                         }
-                    </div>
+                        @r.Url <i class="bi bi-box-arrow-up-right ms-1"></i>
+                    </a>
                 </div>
             </div>
 
-            <div class="col-12 col-lg-4">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <h3 class="h6 mb-3">Sieć & serwer</h3>
+            <div class="verdict-score">
+                <span>@risk</span>
+                <small>/100</small>
+                <div>RiskScore</div>
+            </div>
+        </div>
 
-                        <div class="mb-2">
-                            <div class="text-muted small mb-1">Serwer</div>
-                            <div>@(string.IsNullOrWhiteSpace(r.ServerHeader) ? "—" : r.ServerHeader)</div>
-                        </div>
+        <div class="reason-list mt-3">
+            @foreach (var reason in reasons)
+            {
+                var icon = reason.Type == "ok"
+                    ? "bi-check-circle"
+                    : reason.Type == "warn"
+                        ? "bi-exclamation-triangle"
+                        : "bi-x-octagon";
 
-                        <div class="mb-2">
-                            <div class="text-muted small mb-1">X-Powered-By</div>
-                            <div>@(string.IsNullOrWhiteSpace(r.XPoweredBy) ? "—" : r.XPoweredBy)</div>
-                        </div>
+                <div class="reason-item @reason.Type">
+                    <i class="bi @icon"></i>
+                    <span>@reason.Text</span>
+                </div>
+            }
+        </div>
 
-                        @if (r.HostIps?.Count > 0)
-                        {
-                            <div class="mb-2">
-                                <div class="text-muted small mb-1">Adresy IP</div>
-                                <div class="small text-break">@string.Join(", ", r.HostIps)</div>
+        <div class="privacy-strip mt-4">
+            <div class="privacy-strip-left">
+                <span class="privacy-info-icon">
+                    <i class="bi bi-info-lg"></i>
+                </span>
+
+                <div>
+                    <strong>Pamiętaj</strong>
+                    <span>
+                        Wynik jest orientacyjny. Zawsze sprawdzaj adres strony przed logowaniem lub płatnością.
+                    </span>
+                </div>
+            </div>
+
+            <i class="bi bi-shield-lock privacy-strip-shield"></i>
+        </div>
+    </section>
+
+    <section class="mt-4">
+        <div class="accordion" id="technicalDetails">
+            <div class="accordion-item technical-accordion">
+                <h2 class="accordion-header" id="technicalDetailsHeading">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#technicalDetailsBody" aria-expanded="false" aria-controls="technicalDetailsBody">
+                        <i class="bi bi-code-square me-2"></i>
+                        Szczegóły techniczne dla zaawansowanych
+                    </button>
+                </h2>
+
+                <div id="technicalDetailsBody" class="accordion-collapse collapse" aria-labelledby="technicalDetailsHeading" data-bs-parent="#technicalDetails">
+                    <div class="accordion-body">
+                        <div class="row g-4">
+                            <div class="col-12 col-lg-8">
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <h2 class="h5 mb-0">Podstawowe parametry</h2>
+
+                                            @if (r.IsSafe)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle"></i> Bezpieczny
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">
+                                                    <i class="bi bi-exclamation-octagon"></i> Niebezpieczny
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-3 mb-3">
+                                            @if (!string.IsNullOrWhiteSpace(favicon))
+                                            {
+                                                <img src="@favicon" alt="favicon" width="24" height="24" class="rounded border" />
+                                            }
+
+                                            <a class="link-primary text-break" href="@r.Url" target="_blank" rel="noopener">
+                                                @r.Url <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                            </a>
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-6 col-md-3">
+                                                <div class="p-3 rounded-3 border text-center">
+                                                    <div class="text-muted small">HTTP</div>
+                                                    <span class="badge @StatusBadgeClass(r.StatusCode)">@r.StatusCode</span>
+                                                    <div class="small text-muted mt-1">v@r.HttpVersion</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6 col-md-3">
+                                                <div class="p-3 bg-light rounded-3 border text-center">
+                                                    <div class="text-muted small">TTFB</div>
+                                                    <div class="fw-semibold">@(r.TtfbMs?.ToString() ?? "—") ms</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6 col-md-3">
+                                                <div class="p-3 bg-light rounded-3 border text-center">
+                                                    <div class="text-muted small">Pobranie</div>
+                                                    <div class="fw-semibold">@(r.LoadTime?.TotalMilliseconds.ToString("0") ?? "—") ms</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6 col-md-3">
+                                                <div class="p-3 bg-light rounded-3 border text-center">
+                                                    <div class="text-muted small">HTML</div>
+                                                    @{
+                                                        var kb = r.HtmlBytes.HasValue ? (r.HtmlBytes.Value / 1024d) : (double?)null;
+                                                    }
+                                                    <div class="fw-semibold">@(kb.HasValue ? $"{kb.Value:0.0} KB" : "—")</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mt-2">
+                                            <div class="col-12 col-md-6">
+                                                <div class="p-3 bg-light rounded-3 border">
+                                                    <div class="text-muted small mb-1">Content-Type</div>
+                                                    <div class="fw-semibold">@r.ContentType</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <div class="text-muted small">RiskScore</div>
+                                                        <div class="small fw-semibold">@risk/100</div>
+                                                    </div>
+
+                                                    <div class="progress" role="progressbar" aria-valuenow="@risk" aria-valuemin="0" aria-valuemax="100">
+                                                        <div class="progress-bar @RiskBarClass(risk)" style="width:@risk%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(r.Title) || !string.IsNullOrWhiteSpace(r.Description) || !string.IsNullOrWhiteSpace(r.CanonicalUrl))
+                                        {
+                                            <hr class="my-4" />
+
+                                            <div class="row g-3">
+                                                <div class="col-12 col-md-6">
+                                                    <div class="text-muted small mb-1">Tytuł strony</div>
+                                                    <div class="fw-semibold">@r.Title</div>
+                                                </div>
+
+                                                <div class="col-12 col-md-6">
+                                                    <div class="text-muted small mb-1">Canonical</div>
+
+                                                    @if (!string.IsNullOrWhiteSpace(r.CanonicalUrl))
+                                                    {
+                                                        <a class="text-break" href="@r.CanonicalUrl" target="_blank" rel="noopener">@r.CanonicalUrl</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="text-muted">—</div>
+                                                    }
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <div class="text-muted small mb-1">Opis</div>
+                                                    <div>@(string.IsNullOrWhiteSpace(r.Description) ? "—" : r.Description)</div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm mt-4">
+                                    <div class="card-body">
+                                        <h3 class="h6 mb-3">Zasoby & przekierowania</h3>
+
+                                        <div class="row g-3">
+                                            <div class="col-4">
+                                                <div class="p-3 bg-light rounded-3 border text-center">
+                                                    <div class="text-muted small">Linki</div>
+                                                    <div class="fs-5 fw-bold">@r.LinksCount</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="p-3 bg-light rounded-3 border text-center">
+                                                    <div class="text-muted small">Skrypty</div>
+                                                    <div class="fs-5 fw-bold">@r.ScriptsCount</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="p-3 bg-light rounded-3 border text-center">
+                                                    <div class="text-muted small">Obrazy</div>
+                                                    <div class="fs-5 fw-bold">@r.ImageCount</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if (r.RedirectChain?.Count > 0)
+                                        {
+                                            <div class="mt-3">
+                                                <div class="text-muted small mb-1">Łańcuch przekierowań</div>
+                                                <ul class="small mb-0">
+                                                    @foreach (var hop in r.RedirectChain)
+                                                    {
+                                                        <li>@hop</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                @if ((r.RawHeaders?.Count ?? 0) > 0 || (r.RawContentHeaders?.Count ?? 0) > 0)
+                                {
+                                    <div class="accordion mt-4" id="headersAcc">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="h1">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c1">
+                                                    Surowe nagłówki HTTP
+                                                </button>
+                                            </h2>
+
+                                            <div id="c1" class="accordion-collapse collapse" data-bs-parent="#headersAcc">
+                                                <div class="accordion-body">
+                                                    @if ((r.RawHeaders?.Count ?? 0) > 0)
+                                                    {
+                                                        <div class="mb-2 fw-semibold">Headers</div>
+                                                        <table class="table table-sm">
+                                                            <tbody>
+                                                                @foreach (var kv in r.RawHeaders!.OrderBy(x => x.Key))
+                                                                {
+                                                                    <tr>
+                                                                        <th class="text-nowrap align-top">@kv.Key</th>
+                                                                        <td class="text-break">@kv.Value</td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    }
+
+                                                    @if ((r.RawContentHeaders?.Count ?? 0) > 0)
+                                                    {
+                                                        <div class="mt-3 mb-2 fw-semibold">Content Headers</div>
+                                                        <table class="table table-sm">
+                                                            <tbody>
+                                                                @foreach (var kv in r.RawContentHeaders!.OrderBy(x => x.Key))
+                                                                {
+                                                                    <tr>
+                                                                        <th class="text-nowrap align-top">@kv.Key</th>
+                                                                        <td class="text-break">@kv.Value</td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
-                        }
+
+                            <div class="col-12 col-lg-4">
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-body">
+                                        <h3 class="h6 mb-3">Sieć & serwer</h3>
+
+                                        <div class="mb-2">
+                                            <div class="text-muted small mb-1">Serwer</div>
+                                            <div>@(string.IsNullOrWhiteSpace(r.ServerHeader) ? "—" : r.ServerHeader)</div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <div class="text-muted small mb-1">X-Powered-By</div>
+                                            <div>@(string.IsNullOrWhiteSpace(r.XPoweredBy) ? "—" : r.XPoweredBy)</div>
+                                        </div>
+
+                                        @if (r.HostIps?.Count > 0)
+                                        {
+                                            <div class="mb-2">
+                                                <div class="text-muted small mb-1">Adresy IP</div>
+                                                <div class="small text-break">@string.Join(", ", r.HostIps)</div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-body">
+                                        <h3 class="h6 mb-3">TLS / certyfikat</h3>
+
+                                        <div class="mb-2">
+                                            <span class="text-muted small">Protokół:</span>
+                                            <b>@r.TlsProtocol</b>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <span class="text-muted small">Wystawca:</span>
+                                            <span class="small">@r.CertIssuer</span>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <span class="text-muted small">Podmiot:</span>
+                                            <span class="small">@r.CertSubject</span>
+                                        </div>
+
+                                        <div class="mb-0">
+                                            <span class="text-muted small">Ważny do:</span>
+                                            <b>@r.CertNotAfter?.ToString("yyyy-MM-dd")</b>
+
+                                            @if (r.CertDaysToExpiry.HasValue)
+                                            {
+                                                <span class="small text-muted">(@r.CertDaysToExpiry dni)</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h3 class="h6 mb-3">Nagłówki bezpieczeństwa</h3>
+
+                                        @{
+                                            var h = r.Headers ?? new LinkScannerApp.Models.SecurityHeaders();
+                                            Func<bool, string> mark = ok => ok
+                                                ? "<span class='text-success'><i class='bi bi-shield-check'></i> TAK</span>"
+                                                : "<span class='text-danger'><i class='bi bi-shield-exclamation'></i> NIE</span>";
+                                        }
+
+                                        <ul class="list-unstyled small mb-0">
+                                            <li class="mb-1 d-flex justify-content-between">
+                                                <span>CSP</span> @Html.Raw(mark(h.HasCSP))
+                                            </li>
+                                            <li class="mb-1 d-flex justify-content-between">
+                                                <span>HSTS</span> @Html.Raw(mark(h.HasHSTS))
+                                            </li>
+                                            <li class="mb-1 d-flex justify-content-between">
+                                                <span>X-Frame-Options</span> @Html.Raw(mark(h.HasXFO))
+                                            </li>
+                                            <li class="mb-1 d-flex justify-content-between">
+                                                <span>X-Content-Type-Options</span> @Html.Raw(mark(h.HasXCTO))
+                                            </li>
+                                            <li class="mb-1 d-flex justify-content-between">
+                                                <span>Referrer-Policy</span> @Html.Raw(mark(h.HasReferrerPolicy))
+                                            </li>
+                                            <li class="mb-1 d-flex justify-content-between">
+                                                <span>Permissions-Policy</span> @Html.Raw(mark(h.HasPermissionsPolicy))
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <h3 class="h6 mb-3">TLS / certyfikat</h3>
-
-                        <div class="mb-2">
-                            <span class="text-muted small">Protokół:</span>
-                            <b>@r.TlsProtocol</b>
-                        </div>
-
-                        <div class="mb-2">
-                            <span class="text-muted small">Wystawca:</span>
-                            <span class="small">@r.CertIssuer</span>
-                        </div>
-
-                        <div class="mb-2">
-                            <span class="text-muted small">Podmiot:</span>
-                            <span class="small">@r.CertSubject</span>
-                        </div>
-
-                        <div class="mb-0">
-                            <span class="text-muted small">Ważny do:</span>
-                            <b>@r.CertNotAfter?.ToString("yyyy-MM-dd")</b>
-
-                            @if (r.CertDaysToExpiry.HasValue)
-                            {
-                                <span class="small text-muted">(@r.CertDaysToExpiry dni)</span>
-                            }
-                        </div>
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+            <div id="saveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        Zapisano do historii ✅
                     </div>
-                </div>
 
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <h3 class="h6 mb-3">Nagłówki bezpieczeństwa</h3>
-
-                        @{
-                            var h = r.Headers ?? new LinkScannerApp.Models.SecurityHeaders();
-                            Func<bool, string> mark = ok => ok
-                                ? "<span class='text-success'><i class='bi bi-shield-check'></i> TAK</span>"
-                                : "<span class='text-danger'><i class='bi bi-shield-exclamation'></i> NIE</span>";
-                        }
-
-                        <ul class="list-unstyled small mb-0">
-                            <li class="mb-1 d-flex justify-content-between">
-                                <span>CSP</span> @Html.Raw(mark(h.HasCSP))
-                            </li>
-                            <li class="mb-1 d-flex justify-content-between">
-                                <span>HSTS</span> @Html.Raw(mark(h.HasHSTS))
-                            </li>
-                            <li class="mb-1 d-flex justify-content-between">
-                                <span>X-Frame-Options</span> @Html.Raw(mark(h.HasXFO))
-                            </li>
-                            <li class="mb-1 d-flex justify-content-between">
-                                <span>X-Content-Type-Options</span> @Html.Raw(mark(h.HasXCTO))
-                            </li>
-                            <li class="mb-1 d-flex justify-content-between">
-                                <span>Referrer-Policy</span> @Html.Raw(mark(h.HasReferrerPolicy))
-                            </li>
-                            <li class="mb-1 d-flex justify-content-between">
-                                <span>Permissions-Policy</span> @Html.Raw(mark(h.HasPermissionsPolicy))
-                            </li>
-                        </ul>
-                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             </div>
         </div>
     </section>
-
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
-        <div id="saveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    Zapisano do historii ✅
-                </div>
-
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
 }
 
 @section Scripts {
