@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://linkscanner.onrender.com/sitemap.xml
