@@ -10,4 +10,10 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.12.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LinkScanner.Application\LinkScanner.Application.csproj" />
+    <ProjectReference Include="..\LinkScanner.Infrastructure\LinkScanner.Infrastructure.csproj" />
+    <ProjectReference Include="..\LinkScanner.Domain\LinkScanner.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
