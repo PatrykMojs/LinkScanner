@@ -1,11 +1,14 @@
-using LinkScannerApp.Services;
 using System.Threading.RateLimiting;
+using LinkScanner.Application;
+using LinkScanner.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
 
-builder.Services.AddHttpClient<LinkScannerService>();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -51,6 +54,7 @@ app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapRazorPages();
 
 app.Run();

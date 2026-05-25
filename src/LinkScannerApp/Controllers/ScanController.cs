@@ -1,26 +1,35 @@
-using Microsoft.AspNetCore.Mvc;
+using LinkScanner.Application.UseCases.ScanUrl;
 using LinkScanner.Domain.Entities;
-using LinkScannerApp.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
-namespace LinkScannerApp.Controllers
+namespace LinkScannerApp.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[EnableRateLimiting("ScanPolicy")]
+public class ScanController : ControllerBase
 {
-    public class ScanController : ControllerBase
+    private readonly ScanUrlHandler scanUrlHandler;
+
+    public ScanController(ScanUrlHandler scanUrlHandler)
     {
-        private readonly LinkScannerService scanner;
+        this.scanUrlHandler = scanUrlHandler;
+    }
 
-        public ScanController(LinkScannerService service)
+    [HttpPost]
+    public async Task<ActionResult<LinkScanResult>> Post([FromBody] string url, CancellationToken cancellationToken)
+    {
+        var response = await scanUrlHandler.HandleAsync(new ScanUrlCommand(url), cancellationToken);
+
+        if (!response.IsSuccess)
         {
-            this.scanner = scanner;
+            return BadRequest(new
+            {
+                error = response.ErrorMessage
+            });
         }
 
-        [HttpPost]
-        public async Task<ActionResult<LinkScanResult>> Post([FromBody] string url)
-        {
-            if (string.IsNullOrWhiteSpace(url))
-                return BadRequest("Url is required");
-
-            var result = await scanner.ScanAsync(url);
-            return Ok(result);
-        }
+        return Ok(response.Result);
     }
 }

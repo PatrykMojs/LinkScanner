@@ -23,7 +23,7 @@
     <div class="scanner-divider"></div>
 
     <form method="post" id="scanForm" class="needs-validation scanner-form" novalidate>
-        <label for="Url" class="form-label">Adres URL</label>
+        <label for="InputUrl" class="form-label">Adres URL</label>
 
         <div class="scan-form-row">
             <div class="scan-input-wrapper">
@@ -31,11 +31,11 @@
                     <i class="bi bi-link-45deg"></i>
                 </span>
 
-                <input asp-for="Url"
-                       class="form-control scan-input"
-                       id="Url"
-                       placeholder="https://example.com"
-                       required />
+                <input asp-for="InputUrl"
+                    class="form-control scan-input"
+                    id="InputUrl"
+                    placeholder="https://example.com"
+                    required />
             </div>
 
             <button type="submit" class="btn scan-button" id="scanBtn">
@@ -58,6 +58,7 @@
         </div>
 
         <div class="invalid-feedback">Podaj poprawny adres URL.</div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mt-2"></div>
     </form>
 </section>
 

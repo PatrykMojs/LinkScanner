@@ -1,31 +1,36 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using LinkScanner.Domain.Entities;
-using LinkScannerApp.Services;
 using Microsoft.AspNetCore.RateLimiting;
+using LinkScanner.Domain.Entities;
+using LinkScanner.Application.UseCases.ScanUrl;
 
 namespace LinkScannerApp.Pages;
 
 [EnableRateLimiting("ScanPolicy")]
 public class IndexModel : PageModel
 {
-    private readonly LinkScannerService scanner;
+    private readonly ScanUrlHandler scanUrlHandler;
 
-    public IndexModel(LinkScannerService scanner)
+    public IndexModel(ScanUrlHandler scanUrlHandler)
     {
-        this.scanner = scanner;
+        this.scanUrlHandler = scanUrlHandler;
     }
 
     [BindProperty]
-    public string Url { get; set; } = "";
+    public string InputUrl { get; set; } = "";
     public LinkScanResult? Result { get; set; }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!string.IsNullOrWhiteSpace(Url))
+        var response = await scanUrlHandler.HandleAsync(new ScanUrlCommand(InputUrl), HttpContext.RequestAborted);
+
+        if (!response.IsSuccess)
         {
-            Result = await scanner.ScanAsync(Url);
+            ModelState.AddModelError(string.Empty, response.ErrorMessage ?? "Nie udało się przeskanować adresu URL.");
+            return Page();
         }
+
+        Result = response.Result;
 
         return Page();
     }

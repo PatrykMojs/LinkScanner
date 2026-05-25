@@ -1,48 +1,63 @@
 using System.Net;
 using System.Net.Sockets;
+using LinkScanner.Application.Abstractions;
 
-namespace LinkScannerApp.Services;
+namespace LinkScanner.Infrastructure.Validation;
 
-public static class UrlSafetyValidator
+public sealed class UrlSafetyValidator : IUrlSafetyValidator
 {
-    public static async Task<(bool IsValid, string? Error)> ValidateAsync(string url)
+    public async Task<UrlSafetyValidationResult> ValidateAsync(
+        string url,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(url))
-            return (false, "Adres URL jest pusty.");
+        {
+            return UrlSafetyValidationResult.Failure("Adres URL jest pusty.");
+        }
 
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
-            return (false, "Nieprawidłowy adres URL.");
+        {
+            return UrlSafetyValidationResult.Failure("Nieprawidłowy adres URL.");
+        }
 
         if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
-            return (false, "Dozwolone są tylko adresy HTTP i HTTPS.");
+        {
+            return UrlSafetyValidationResult.Failure("Dozwolone są tylko adresy HTTP i HTTPS.");
+        }
 
         if (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
-            return (false, "Nie można skanować localhost.");
+        {
+            return UrlSafetyValidationResult.Failure("Nie można skanować localhost.");
+        }
 
         IPAddress[] addresses;
 
         try
         {
-            addresses = await Dns.GetHostAddressesAsync(uri.Host);
+            addresses = await Dns.GetHostAddressesAsync(uri.Host, cancellationToken);
         }
         catch
         {
-            return (false, "Nie udało się rozwiązać adresu hosta.");
+            return UrlSafetyValidationResult.Failure("Nie udało się rozwiązać adresu hosta.");
         }
 
         foreach (var ip in addresses)
         {
             if (IsPrivateOrLocalIp(ip))
-                return (false, "Adres prowadzi do sieci prywatnej lub lokalnej.");
+            {
+                return UrlSafetyValidationResult.Failure("Adres prowadzi do sieci prywatnej lub lokalnej.");
+            }
         }
 
-        return (true, null);
+        return UrlSafetyValidationResult.Success();
     }
 
     private static bool IsPrivateOrLocalIp(IPAddress ip)
     {
         if (IPAddress.IsLoopback(ip))
+        {
             return true;
+        }
 
         if (ip.AddressFamily == AddressFamily.InterNetwork)
         {
