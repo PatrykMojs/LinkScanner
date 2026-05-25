@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using LinkScannerApp.Models;
+using LinkScanner.Domain.Entities;
 using LinkScannerApp.Services;
 
 namespace LinkScannerApp.Controllers

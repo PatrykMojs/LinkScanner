@@ -611,7 +611,7 @@
                                         <h3 class="h6 mb-3">Nagłówki bezpieczeństwa</h3>
 
                                         @{
-                                            var h = r.Headers ?? new LinkScannerApp.Models.SecurityHeaders();
+                                            var h = r.Headers ?? new LinkScanner.Domain.Entities.SecurityHeaders();
                                             Func<bool, string> mark = ok => ok
                                                 ? "<span class='text-success'><i class='bi bi-shield-check'></i> TAK</span>"
                                                 : "<span class='text-danger'><i class='bi bi-shield-exclamation'></i> NIE</span>";

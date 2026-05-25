@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using LinkScannerApp.Models;
+using LinkScanner.Domain.Entities;
 using LinkScannerApp.Services;
 using Microsoft.AspNetCore.RateLimiting;
 

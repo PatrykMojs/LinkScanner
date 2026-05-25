@@ -1,4 +1,4 @@
-namespace LinkScannerApp.Models
+namespace LinkScanner.Domain.Entities
 {
     public sealed class LinkScanResult
     {

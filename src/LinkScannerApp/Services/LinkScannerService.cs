@@ -1,6 +1,6 @@
 using HtmlAgilityPack;
 using System.Diagnostics;
-using LinkScannerApp.Models;
+using LinkScanner.Domain.Entities;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
