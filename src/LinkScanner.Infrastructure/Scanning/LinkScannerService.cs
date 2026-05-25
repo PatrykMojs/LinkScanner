@@ -168,8 +168,8 @@ public sealed class LinkScannerService : ILinkScanner
 
             if ((int)response.StatusCode is >= 300 and < 400 && response.Headers.Location is Uri location)
             {
-                var next = location.IsAbsoluteUri 
-                    ? location.ToString() 
+                var next = location.IsAbsoluteUri
+                    ? location.ToString()
                     : new Uri(new Uri(current), location).ToString();
 
                 var validation = await urlSafetyValidator.ValidateAsync(next, cancellationToken);

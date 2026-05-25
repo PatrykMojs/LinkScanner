@@ -38,6 +38,6 @@ public sealed class LinkScanResult
 
     public int RiskScore { get; set; }
 
-    public Dictionary<string,string>? RawHeaders { get; set; } = new();
-    public Dictionary<string,string>? RawContentHeaders { get; set; } = new();
+    public Dictionary<string, string>? RawHeaders { get; set; } = new();
+    public Dictionary<string, string>? RawContentHeaders { get; set; } = new();
 }

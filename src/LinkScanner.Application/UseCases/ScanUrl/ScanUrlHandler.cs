@@ -5,7 +5,7 @@ namespace LinkScanner.Application.UseCases.ScanUrl;
 public sealed class ScanUrlHandler
 {
     private readonly IUrlSafetyValidator _urlSafetyValidator;
-    private readonly ILinkScanner _linkScanner; 
+    private readonly ILinkScanner _linkScanner;
 
     public ScanUrlHandler(IUrlSafetyValidator urlSafetyValidator, ILinkScanner linkScanner)
     {
