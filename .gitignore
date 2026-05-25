@@ -1,0 +1,68 @@
+# Build results
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# .NET
+*.rsuser
+*.sln.DotSettings.user
+project.lock.json
+project.assets.json
+artifacts/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Logs
+logs/
+Logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Publish output
+publish/
+Publish/
+app.publish/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.lscache
+
+# ASP.NET Core
+appsettings.Development.json
+
+# Environment variables / secrets
+.env
+.env.*
+secrets.json
+
+# Test results
+TestResults/
+coverage/
+coverage.xml
+*.coverage
+*.coveragexml
+
+# Docker
+docker-compose.override.yml
