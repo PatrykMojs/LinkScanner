@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using LinkScanner.Application.Abstractions;
 using LinkScanner.Domain.Entities;
+using LinkScanner.Infrastructure.Scanning.Analyzer;
 
 namespace LinkScanner.Infrastructure.Scanning;
 
@@ -13,11 +14,21 @@ public sealed class LinkScannerService : ILinkScanner
 {
     private readonly HttpClient httpClient;
     private readonly IUrlSafetyValidator urlSafetyValidator;
+    private readonly SecurityHeadersAnalyzer securityHeadersAnalyzer;
+    private readonly HostIpResolver hostIpResolver;
+    private readonly RiskScoreCalculator riskScoreCalculator;
 
-    public LinkScannerService(HttpClient httpClient, IUrlSafetyValidator urlSafetyValidator)
+    public LinkScannerService(HttpClient httpClient, 
+        IUrlSafetyValidator urlSafetyValidator,
+        SecurityHeadersAnalyzer securityHeadersAnalyzer,
+        HostIpResolver hostIpResolver,
+        RiskScoreCalculator riskScoreCalculator)
     {
         this.httpClient = httpClient;
         this.urlSafetyValidator = urlSafetyValidator;
+        this.securityHeadersAnalyzer = securityHeadersAnalyzer;
+        this.hostIpResolver = hostIpResolver;
+        this.riskScoreCalculator = riskScoreCalculator;
 
         this.httpClient.Timeout = TimeSpan.FromSeconds(8);
         this.httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
@@ -43,7 +54,7 @@ public sealed class LinkScannerService : ILinkScanner
 
         try
         {
-            result.HostIps = await ResolveIpsAsync(url);
+            result.HostIps = await hostIpResolver.ResolveAsync(url, cancellationToken);
 
             result.RedirectChain = await GetRedirectsAsync(url, cancellationToken);
 
@@ -70,15 +81,7 @@ public sealed class LinkScannerService : ILinkScanner
                 result.LoadTime = stopWatch.Elapsed;
                 result.HtmlBytes = System.Text.Encoding.UTF8.GetByteCount(html);
 
-                result.Headers = new SecurityHeaders
-                {
-                    HasCSP = HasHeader(response, "Content-Security-Policy"),
-                    HasHSTS = HasHeader(response, "Strict-Transport-Security"),
-                    HasXFO = HasHeader(response, "X-Frame-Options"),
-                    HasXCTO = HasHeader(response, "X-Content-Type-Options"),
-                    HasReferrerPolicy = HasHeader(response, "Referrer-Policy"),
-                    HasPermissionsPolicy = HasHeader(response, "Permissions-Policy")
-                };
+                result.Headers = securityHeadersAnalyzer.Analyze(response);
             }
 
             var doc = new HtmlDocument();
@@ -125,7 +128,7 @@ public sealed class LinkScannerService : ILinkScanner
             result.IsSafe = !url.Contains("phishing", StringComparison.OrdinalIgnoreCase)
                 && !url.Contains("malware", StringComparison.OrdinalIgnoreCase);
 
-            result.RiskScore = ComputeRiskScore(url, result);
+            result.RiskScore = riskScoreCalculator.Calculate(url, result);
         }
         catch
         {
@@ -134,23 +137,6 @@ public sealed class LinkScannerService : ILinkScanner
         }
 
         return result;
-    }
-
-    static bool HasHeader(HttpResponseMessage responseMessage, string name) =>
-        responseMessage.Headers.Contains(name) || responseMessage.Content.Headers.Contains(name);
-
-    static int ComputeRiskScore(string url, LinkScanResult result)
-    {
-        int score = 0;
-
-        if (!url.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) score += 40;
-        if ((result.StatusCode ?? 200) >= 400) score += 25;
-        if (result.Headers is { HasCSP: false }) score += 5;
-        if (result.Headers is { HasHSTS: false } && url.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) score += 5;
-        if (string.IsNullOrWhiteSpace(result.Title)) score += 5;
-        if (result.MixedContent) score += 10;
-        if ((result.CertDaysToExpiry ?? 365) < 14) score += 10;
-        return Math.Min(100, score);
     }
 
     private async Task<List<string>> GetRedirectsAsync(string url, CancellationToken cancellationToken = default, int maxHops = 5)
@@ -186,20 +172,6 @@ public sealed class LinkScannerService : ILinkScanner
             else break;
         }
         return list;
-    }
-
-    static async Task<List<string>> ResolveIpsAsync(string url)
-    {
-        try
-        {
-            var host = new Uri(url).Host;
-            var ips = await Dns.GetHostAddressesAsync(host);
-            return ips.Select(i => i.ToString()).Distinct().ToList();
-        }
-        catch
-        {
-            return new List<string>();
-        }
     }
 
     static async Task<(string protocol, string subject, string issuer, DateTimeOffset notAfter)?> TryGetTlsInfoAsync(string url)
