@@ -14,6 +14,7 @@ public sealed class LinkScannerService : ILinkScanner
     private readonly TlsCertificateAnalyzer tlsCertificateAnalyzer;
     private readonly HtmlMetadataExtractor htmlMetadataExtractor;
     private readonly HttpPageFetcher httpPageFetcher;
+    private readonly SafetyDecisionAnalyzer safetyDecisionAnalyzer;
 
     public LinkScannerService(SecurityHeadersAnalyzer securityHeadersAnalyzer,
         HostIpResolver hostIpResolver,
@@ -21,7 +22,8 @@ public sealed class LinkScannerService : ILinkScanner
         RedirectAnalyzer redirectAnalyzer,
         TlsCertificateAnalyzer tlsCertificateAnalyzer,
         HtmlMetadataExtractor htmlMetadataExtractor,
-        HttpPageFetcher httpPageFetcher)
+        HttpPageFetcher httpPageFetcher,
+        SafetyDecisionAnalyzer safetyDecisionAnalyzer)
     {
         this.securityHeadersAnalyzer = securityHeadersAnalyzer;
         this.hostIpResolver = hostIpResolver;
@@ -30,6 +32,7 @@ public sealed class LinkScannerService : ILinkScanner
         this.tlsCertificateAnalyzer = tlsCertificateAnalyzer;
         this.htmlMetadataExtractor = htmlMetadataExtractor;
         this.httpPageFetcher = httpPageFetcher;
+        this.safetyDecisionAnalyzer = safetyDecisionAnalyzer;
     }
 
     public async Task<LinkScanResult> ScanAsync(string url, CancellationToken cancellationToken = default)
@@ -79,10 +82,8 @@ public sealed class LinkScannerService : ILinkScanner
                     : (int)(tls.NotAfter - DateTimeOffset.UtcNow).TotalDays;
             }
 
-            result.IsSafe = !url.Contains("phishing", StringComparison.OrdinalIgnoreCase)
-                && !url.Contains("malware", StringComparison.OrdinalIgnoreCase);
-
             result.RiskScore = riskScoreCalculator.Calculate(url, result);
+            result.IsSafe = safetyDecisionAnalyzer.IsSafe(url, result);
         }
         catch
         {
