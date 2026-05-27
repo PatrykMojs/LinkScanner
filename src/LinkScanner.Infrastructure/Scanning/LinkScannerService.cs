@@ -1,12 +1,8 @@
 using HtmlAgilityPack;
 using System.Diagnostics;
-using System.Net;
-using System.Net.Security;
-using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using LinkScanner.Application.Abstractions;
 using LinkScanner.Domain.Entities;
-using LinkScanner.Infrastructure.Scanning.Analyzer;
+using LinkScanner.Infrastructure.Scanning.Analyzers;
 
 namespace LinkScanner.Infrastructure.Scanning;
 
@@ -17,18 +13,27 @@ public sealed class LinkScannerService : ILinkScanner
     private readonly SecurityHeadersAnalyzer securityHeadersAnalyzer;
     private readonly HostIpResolver hostIpResolver;
     private readonly RiskScoreCalculator riskScoreCalculator;
+    private readonly RedirectAnalyzer redirectAnalyzer;
+    private readonly TlsCertificateAnalyzer tlsCertificateAnalyzer;
+    private readonly HtmlMetadataExtractor htmlMetadataExtractor;
 
     public LinkScannerService(HttpClient httpClient, 
         IUrlSafetyValidator urlSafetyValidator,
         SecurityHeadersAnalyzer securityHeadersAnalyzer,
         HostIpResolver hostIpResolver,
-        RiskScoreCalculator riskScoreCalculator)
+        RiskScoreCalculator riskScoreCalculator,
+        RedirectAnalyzer redirectAnalyzer,
+        TlsCertificateAnalyzer tlsCertificateAnalyzer,
+        HtmlMetadataExtractor htmlMetadataExtractor)
     {
         this.httpClient = httpClient;
         this.urlSafetyValidator = urlSafetyValidator;
         this.securityHeadersAnalyzer = securityHeadersAnalyzer;
         this.hostIpResolver = hostIpResolver;
         this.riskScoreCalculator = riskScoreCalculator;
+        this.redirectAnalyzer = redirectAnalyzer;
+        this.tlsCertificateAnalyzer = tlsCertificateAnalyzer;
+        this.htmlMetadataExtractor = htmlMetadataExtractor;
 
         this.httpClient.Timeout = TimeSpan.FromSeconds(8);
         this.httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
@@ -56,7 +61,7 @@ public sealed class LinkScannerService : ILinkScanner
         {
             result.HostIps = await hostIpResolver.ResolveAsync(url, cancellationToken);
 
-            result.RedirectChain = await GetRedirectsAsync(url, cancellationToken);
+            result.RedirectChain = await redirectAnalyzer.AnalyzeAsync(url, cancellationToken);
 
             var ttfb = new Stopwatch();
             string html;
@@ -84,45 +89,28 @@ public sealed class LinkScannerService : ILinkScanner
                 result.Headers = securityHeadersAnalyzer.Analyze(response);
             }
 
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-            string? GetMeta(string name) =>
-                doc.DocumentNode.SelectSingleNode($"//meta[@name='{name}']")?.GetAttributeValue("content", null);
-            string? GetProp(string prop) =>
-                doc.DocumentNode.SelectSingleNode($"//meta[@property='{prop}']")?.GetAttributeValue("content", null);
+            var metadata = htmlMetadataExtractor.Extract(html, url);
 
-            result.Title = doc.DocumentNode.SelectSingleNode("//title")?.InnerText?.Trim()
-                ?? GetProp("og:title") ?? GetMeta("twitter:title");
-            result.Description = GetMeta("description") ?? GetProp("og:description") ?? GetMeta("twitter:description");
-            result.CanonicalUrl = doc.DocumentNode.SelectSingleNode("//link[@rel='canonical']")?.GetAttributeValue("href", null);
-            result.FaviconUrl = doc.DocumentNode.SelectSingleNode("//link[@rel='icon']")?.GetAttributeValue("href", null)
-                            ?? doc.DocumentNode.SelectSingleNode("//link[@rel='shortcut icon']")?.GetAttributeValue("href", null);
+            result.Title = metadata.Title;
+            result.Description = metadata.Description;
+            result.CanonicalUrl = metadata.CanonicalUrl;
+            result.FaviconUrl = metadata.FaviconUrl;
+            result.LinksCount = metadata.LinksCount;
+            result.ScriptsCount = metadata.ScriptsCount;
+            result.ImageCount = metadata.ImageCount;
+            result.MixedContent = metadata.MixedContent;
 
-            result.LinksCount = doc.DocumentNode.SelectNodes("//a")?.Count ?? 0;
-            result.ScriptsCount = doc.DocumentNode.SelectNodes("//script")?.Count ?? 0;
-            result.ImageCount = doc.DocumentNode.SelectNodes("//img")?.Count ?? 0;
-
-            var isHttps = url.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
-
-            if (isHttps)
-            {
-                result.MixedContent = doc.DocumentNode.SelectNodes("//*[@src or @href]")
-                ?.Any(n =>
-                {
-                    var v = n.GetAttributeValue("src", null) ?? n.GetAttributeValue("href", null);
-                    return v != null && v.StartsWith("http://", StringComparison.OrdinalIgnoreCase);
-                }) == true;
-            }
-
-            var tls = await TryGetTlsInfoAsync(url);
+            var tls = await tlsCertificateAnalyzer.AnalyzeAsync(url, cancellationToken);
 
             if (tls is not null)
             {
-                result.TlsProtocol = tls.Value.protocol;
-                result.CertSubject = tls.Value.subject;
-                result.CertIssuer = tls.Value.issuer;
-                result.CertNotAfter = tls.Value.notAfter;
-                result.CertDaysToExpiry = (int)Math.Round((tls.Value.notAfter - DateTimeOffset.UtcNow).TotalDays);
+                result.TlsProtocol = tls?.Protocol;
+                result.CertSubject = tls?.Subject;
+                result.CertIssuer = tls?.Issuer;
+                result.CertNotAfter = tls?.NotAfter;
+                result.CertDaysToExpiry = tls is null
+                    ? null
+                    : (int)(tls.NotAfter - DateTimeOffset.UtcNow).TotalDays;
             }
 
             result.IsSafe = !url.Contains("phishing", StringComparison.OrdinalIgnoreCase)
@@ -137,64 +125,5 @@ public sealed class LinkScannerService : ILinkScanner
         }
 
         return result;
-    }
-
-    private async Task<List<string>> GetRedirectsAsync(string url, CancellationToken cancellationToken = default, int maxHops = 5)
-    {
-        var list = new List<string>();
-        var handler = new HttpClientHandler { AllowAutoRedirect = false };
-        using var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(5) };
-
-        var current = url;
-
-        for (int i = 0; i < maxHops; i++)
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Head, current);
-            using var response = await client.SendAsync(request, cancellationToken);
-
-            if ((int)response.StatusCode is >= 300 and < 400 && response.Headers.Location is Uri location)
-            {
-                var next = location.IsAbsoluteUri
-                    ? location.ToString()
-                    : new Uri(new Uri(current), location).ToString();
-
-                var validation = await urlSafetyValidator.ValidateAsync(next, cancellationToken);
-
-                if (!validation.IsValid)
-                {
-                    list.Add($"{(int)response.StatusCode} -> BLOCKED: {validation.ErrorMessage}");
-                    break;
-                }
-                    
-                list.Add($"{(int)response.StatusCode} -> {next}");
-                current = next;
-            }
-            else break;
-        }
-        return list;
-    }
-
-    static async Task<(string protocol, string subject, string issuer, DateTimeOffset notAfter)?> TryGetTlsInfoAsync(string url)
-    {
-        try
-        {
-            var uri = new Uri(url);
-
-            if (uri.Scheme != Uri.UriSchemeHttps) 
-            return null;
-
-            using var client = new TcpClient();
-            await client.ConnectAsync(uri.Host, 443);
-            using var stream = client.GetStream();
-            using var ssl = new SslStream(stream, false, new RemoteCertificateValidationCallback((_, cert, _, _) => cert != null));
-            await ssl.AuthenticateAsClientAsync(uri.Host);
-            var cert2 = new X509Certificate2(ssl.RemoteCertificate!);
-
-            return (ssl.SslProtocol.ToString(), cert2.Subject, cert2.Issuer, cert2.NotAfter);
-        }
-        catch
-        {
-            return null;
-        }
     }
 }

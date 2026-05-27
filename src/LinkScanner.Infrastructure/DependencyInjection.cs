@@ -1,7 +1,7 @@
 using LinkScanner.Application.Abstractions;
 using LinkScanner.Infrastructure.Scanning;
 using LinkScanner.Infrastructure.Validation;
-using LinkScanner.Infrastructure.Scanning.Analyzer;
+using LinkScanner.Infrastructure.Scanning.Analyzers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LinkScanner.Infrastructure;
@@ -16,6 +16,9 @@ public static class DependencyInjection
         services.AddScoped<SecurityHeadersAnalyzer>();
         services.AddScoped<HostIpResolver>();
         services.AddScoped<RiskScoreCalculator>();
+        services.AddScoped<RedirectAnalyzer>();
+        services.AddScoped<TlsCertificateAnalyzer>();
+        services.AddScoped<HtmlMetadataExtractor>();
 
         return services;
     }

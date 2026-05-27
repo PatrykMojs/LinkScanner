@@ -1,6 +1,6 @@
 using LinkScanner.Domain.Entities;
 
-namespace LinkScanner.Infrastructure.Scanning.Analyzer;
+namespace LinkScanner.Infrastructure.Scanning.Analyzers;
 
 public sealed class RiskScoreCalculator
 {

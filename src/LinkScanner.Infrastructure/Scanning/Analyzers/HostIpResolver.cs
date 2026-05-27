@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace LinkScanner.Infrastructure.Scanning.Analyzer;
+namespace LinkScanner.Infrastructure.Scanning.Analyzers;
 
 public sealed class HostIpResolver
 {
