@@ -1,95 +1,61 @@
-using HtmlAgilityPack;
-using System.Diagnostics;
 using LinkScanner.Application.Abstractions;
 using LinkScanner.Domain.Entities;
 using LinkScanner.Infrastructure.Scanning.Analyzers;
+using LinkScanner.Infrastructure.Scanning.Http;
 
 namespace LinkScanner.Infrastructure.Scanning;
 
 public sealed class LinkScannerService : ILinkScanner
 {
-    private readonly HttpClient httpClient;
-    private readonly IUrlSafetyValidator urlSafetyValidator;
     private readonly SecurityHeadersAnalyzer securityHeadersAnalyzer;
     private readonly HostIpResolver hostIpResolver;
     private readonly RiskScoreCalculator riskScoreCalculator;
     private readonly RedirectAnalyzer redirectAnalyzer;
     private readonly TlsCertificateAnalyzer tlsCertificateAnalyzer;
     private readonly HtmlMetadataExtractor htmlMetadataExtractor;
+    private readonly HttpPageFetcher httpPageFetcher;
 
-    public LinkScannerService(HttpClient httpClient, 
-        IUrlSafetyValidator urlSafetyValidator,
-        SecurityHeadersAnalyzer securityHeadersAnalyzer,
+    public LinkScannerService(SecurityHeadersAnalyzer securityHeadersAnalyzer,
         HostIpResolver hostIpResolver,
         RiskScoreCalculator riskScoreCalculator,
         RedirectAnalyzer redirectAnalyzer,
         TlsCertificateAnalyzer tlsCertificateAnalyzer,
-        HtmlMetadataExtractor htmlMetadataExtractor)
+        HtmlMetadataExtractor htmlMetadataExtractor,
+        HttpPageFetcher httpPageFetcher)
     {
-        this.httpClient = httpClient;
-        this.urlSafetyValidator = urlSafetyValidator;
         this.securityHeadersAnalyzer = securityHeadersAnalyzer;
         this.hostIpResolver = hostIpResolver;
         this.riskScoreCalculator = riskScoreCalculator;
         this.redirectAnalyzer = redirectAnalyzer;
         this.tlsCertificateAnalyzer = tlsCertificateAnalyzer;
         this.htmlMetadataExtractor = htmlMetadataExtractor;
-
-        this.httpClient.Timeout = TimeSpan.FromSeconds(8);
-        this.httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
+        this.httpPageFetcher = httpPageFetcher;
     }
 
     public async Task<LinkScanResult> ScanAsync(string url, CancellationToken cancellationToken = default)
     {
-        var validation = await urlSafetyValidator.ValidateAsync(url);
-
-        if (!validation.IsValid)
-        {
-            return new LinkScanResult
-            {
-                Url = url,
-                IsSafe = false,
-                RiskScore = 100,
-                StatusCode = null,
-                Title = validation.ErrorMessage
-            };
-        }
-
         var result = new LinkScanResult { Url = url };
 
         try
         {
             result.HostIps = await hostIpResolver.ResolveAsync(url, cancellationToken);
-
             result.RedirectChain = await redirectAnalyzer.AnalyzeAsync(url, cancellationToken);
 
-            var ttfb = new Stopwatch();
-            string html;
-            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
-            {
-                ttfb.Start();
-                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                result.RawHeaders = response.Headers.ToDictionary(h => h.Key, h => string.Join(", ", h.Value));
-                result.RawContentHeaders = response.Content.Headers.ToDictionary(h => h.Key, h => string.Join(", ", h.Value));
-                ttfb.Stop();
+            var page = await httpPageFetcher.FetchAsync(url, cancellationToken);
 
-                result.StatusCode = (int)response.StatusCode;
-                result.ContentType = response.Content.Headers.ContentType?.MediaType;
-                result.HttpVersion = response.Version.ToString();
-                result.ServerHeader = response.Headers.TryGetValues("server", out var sv) ? sv.FirstOrDefault() : null;
-                result.XPoweredBy = response.Headers.TryGetValues("x-powered-by", out var xp) ? xp.FirstOrDefault() : null;
-                result.TtfbMs = (int)Math.Round(ttfb.Elapsed.TotalMilliseconds);
+            result.RawHeaders = page.RawHeaders;
+            result.RawContentHeaders = page.RawContentHeaders;
+            result.StatusCode = page.StatusCode;
+            result.ContentType = page.ContentType;
+            result.HttpVersion = page.HttpVersion;
+            result.ServerHeader = page.ServerHeader;
+            result.XPoweredBy = page.XPoweredBy;
+            result.TtfbMs = page.TtfbMs;
+            result.LoadTime = page.LoadTime;
+            result.HtmlBytes = page.HtmlBytes;
+            result.Headers = securityHeadersAnalyzer.Analyze(page.Response);
 
-                var stopWatch = Stopwatch.StartNew();
-                html = await response.Content.ReadAsStringAsync();
-                stopWatch.Stop();
-                result.LoadTime = stopWatch.Elapsed;
-                result.HtmlBytes = System.Text.Encoding.UTF8.GetByteCount(html);
-
-                result.Headers = securityHeadersAnalyzer.Analyze(response);
-            }
-
-            var metadata = htmlMetadataExtractor.Extract(html, url);
+            var metadata = htmlMetadataExtractor.Extract(page.Html, url);
 
             result.Title = metadata.Title;
             result.Description = metadata.Description;
