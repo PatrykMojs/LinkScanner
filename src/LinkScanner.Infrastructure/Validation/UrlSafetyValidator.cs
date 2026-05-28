@@ -1,14 +1,20 @@
 using System.Net;
 using System.Net.Sockets;
 using LinkScanner.Application.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace LinkScanner.Infrastructure.Validation;
 
 public sealed class UrlSafetyValidator : IUrlSafetyValidator
 {
-    public async Task<UrlSafetyValidationResult> ValidateAsync(
-        string url,
-        CancellationToken cancellationToken = default)
+    private readonly ILogger<UrlSafetyValidator> _logger;
+
+    public UrlSafetyValidator(ILogger<UrlSafetyValidator> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task<UrlSafetyValidationResult> ValidateAsync(string url, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(url))
         {
@@ -27,6 +33,7 @@ public sealed class UrlSafetyValidator : IUrlSafetyValidator
 
         if (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
         {
+            _logger.LogWarning("Blocked localhost URL: {Url}", url);
             return UrlSafetyValidationResult.Failure("Nie można skanować localhost.");
         }
 
@@ -36,8 +43,9 @@ public sealed class UrlSafetyValidator : IUrlSafetyValidator
         {
             addresses = await Dns.GetHostAddressesAsync(uri.Host, cancellationToken);
         }
-        catch
+        catch(Exception ex)
         {
+            _logger.LogWarning(ex, "DNS resolution failed for host: {Host}", uri.Host);
             return UrlSafetyValidationResult.Failure("Nie udało się rozwiązać adresu hosta.");
         }
 
@@ -45,6 +53,7 @@ public sealed class UrlSafetyValidator : IUrlSafetyValidator
         {
             if (IsPrivateOrLocalIp(ip))
             {
+                _logger.LogWarning("Blocked private or local IP address. Url: {Url}, IP: {IpAddress}", url, ip);
                 return UrlSafetyValidationResult.Failure("Adres prowadzi do sieci prywatnej lub lokalnej.");
             }
         }

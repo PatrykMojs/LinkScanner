@@ -1,17 +1,20 @@
 using System.Diagnostics;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace LinkScanner.Infrastructure.Scanning.Http;
 
 public sealed class HttpPageFetcher
 {
-    private readonly HttpClient httpClient;
+    private readonly ILogger<HttpPageFetcher> _logger;
+    private readonly HttpClient _httpClient;
 
-    public HttpPageFetcher(HttpClient httpClient)
+    public HttpPageFetcher(ILogger<HttpPageFetcher> logger, HttpClient httpClient)
     {
-        this.httpClient = httpClient;
-        this.httpClient.Timeout = TimeSpan.FromSeconds(8);
-        this.httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
+        _logger = logger;
+        _httpClient = httpClient;
+        _httpClient.Timeout = TimeSpan.FromSeconds(8);
+        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
     }
 
     public async Task<HttpPageFetchResult> FetchAsync(string url, CancellationToken cancellationToken = default)
@@ -20,7 +23,7 @@ public sealed class HttpPageFetcher
 
         var ttfb = Stopwatch.StartNew();
 
-        var response = await httpClient.SendAsync(
+        var response = await _httpClient.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken);
@@ -38,6 +41,14 @@ public sealed class HttpPageFetcher
         var html = await response.Content.ReadAsStringAsync(cancellationToken);
 
         loadTimer.Stop();
+
+        _logger.LogDebug(
+            "Fetched page. Url: {Url}, StatusCode: {StatusCode}, TTFB: {TtfbMs}ms, LoadTime: {LoadTimeMs}ms, HtmlBytes: {HtmlBytes}",
+            url,
+            (int)response.StatusCode,
+            (int)Math.Round(ttfb.Elapsed.TotalMilliseconds),
+            (int)Math.Round(loadTimer.Elapsed.TotalMilliseconds),
+            Encoding.UTF8.GetByteCount(html));
 
         return new HttpPageFetchResult
         {

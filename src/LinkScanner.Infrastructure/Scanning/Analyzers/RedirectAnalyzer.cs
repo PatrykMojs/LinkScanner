@@ -1,14 +1,17 @@
 using LinkScanner.Application.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace LinkScanner.Infrastructure.Scanning.Analyzers;
 
 public sealed class RedirectAnalyzer
 {
-    private readonly IUrlSafetyValidator urlSafetyValidator;
+    private readonly ILogger<RedirectAnalyzer> _logger;
+    private readonly IUrlSafetyValidator _urlSafetyValidator;
 
-    public RedirectAnalyzer(IUrlSafetyValidator urlSafetyValidator)
+    public RedirectAnalyzer(ILogger<RedirectAnalyzer> logger, IUrlSafetyValidator urlSafetyValidator)
     {
-        this.urlSafetyValidator = urlSafetyValidator;
+        _logger = logger;
+        _urlSafetyValidator = urlSafetyValidator;
     }
 
     public async Task<List<string>> AnalyzeAsync(string url, CancellationToken cancellationToken = default, int maxHops = 5)
@@ -40,17 +43,25 @@ public sealed class RedirectAnalyzer
                 ? location.ToString()
                 : new Uri(new Uri(current), location).ToString();
 
-            var validation = await urlSafetyValidator.ValidateAsync(next, cancellationToken);
+            var validation = await _urlSafetyValidator.ValidateAsync(next, cancellationToken);
 
             if(!validation.IsValid)
             {
                 list.Add($"{(int)response.StatusCode} -> BLOCKED: {validation.ErrorMessage}");
+                
+                _logger.LogWarning("Blocked redirect. CurrentUrl: {CurrentUrl}, NextUrl: {NextUrl}, Reason: {Reason}",
+                    current,
+                    next,
+                    validation.ErrorMessage);
+
                 break;
             }
 
             list.Add($"{(int)response.StatusCode} -> {next}");
             current = next;
         }
+
+        _logger.LogDebug("Redirect analysis finished for URL: {Url}. Redirect count: {RedirectCount}", url, list.Count);
 
         return list;
     }

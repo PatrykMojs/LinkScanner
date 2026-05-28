@@ -1,8 +1,14 @@
 using System.Threading.RateLimiting;
 using LinkScanner.Application;
 using LinkScanner.Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+{
+   configuration.ReadFrom.Configuration(context.Configuration); 
+});
 
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
@@ -39,6 +45,8 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 if (!app.Environment.IsDevelopment())
 {
