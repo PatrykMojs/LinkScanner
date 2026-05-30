@@ -1,7 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
 using LinkScanner.Application.Abstractions;
 using LinkScanner.Infrastructure.Scanning;
 using LinkScanner.Infrastructure.Scanning.Analyzers;
-using Microsoft.Extensions.DependencyInjection;
 using LinkScanner.Infrastructure.Scanning.Http;
 using LinkScanner.Infrastructure.Validation;
 
@@ -24,6 +24,17 @@ public static class DependencyInjection
         services.AddScoped<HtmlMetadataExtractor>();
         services.AddScoped<SafetyDecisionAnalyzer>();
         services.AddScoped<HttpPageFetcher>();
+
+        services
+            .AddHttpClient<IRedirectHttpClient, RedirectHttpClient>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(8);
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false
+            });
 
         return services;
     }
