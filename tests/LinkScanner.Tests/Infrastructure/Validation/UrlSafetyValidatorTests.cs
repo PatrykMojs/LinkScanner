@@ -1,12 +1,22 @@
 using FluentAssertions;
 using LinkScanner.Infrastructure.Validation;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using System.Net;
 
 namespace LinkScanner.Tests.Infrastructure.Validation;
 
 public sealed class UrlSafetyValidatorTests
 {
-    private readonly UrlSafetyValidator _validator = new(NullLogger<UrlSafetyValidator>.Instance);
+    private readonly Mock<IDnsResolver> _dnsResolverMock = new();
+    private readonly UrlSafetyValidator _validator;
+
+    public UrlSafetyValidatorTests()
+    {
+        _validator = new UrlSafetyValidator(
+            NullLogger<UrlSafetyValidator>.Instance,
+            _dnsResolverMock.Object);
+    }
 
     [Theory]
     [InlineData("")]
@@ -18,6 +28,10 @@ public sealed class UrlSafetyValidatorTests
 
         result.IsValid.Should().BeFalse();
         result.ErrorMessage.Should().Be("Adres URL jest pusty.");
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
@@ -30,6 +44,10 @@ public sealed class UrlSafetyValidatorTests
 
         result.IsValid.Should().BeFalse();
         result.ErrorMessage.Should().Be("Nieprawidłowy adres URL.");
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
@@ -41,6 +59,10 @@ public sealed class UrlSafetyValidatorTests
 
         result.IsValid.Should().BeFalse();
         result.ErrorMessage.Should().Be("Dozwolone są tylko adresy HTTP i HTTPS.");
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
@@ -53,6 +75,10 @@ public sealed class UrlSafetyValidatorTests
 
         result.IsValid.Should().BeFalse();
         result.ErrorMessage.Should().Be("Nie można skanować localhost.");
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
@@ -68,6 +94,10 @@ public sealed class UrlSafetyValidatorTests
 
         result.IsValid.Should().BeFalse();
         result.ErrorMessage.Should().Be("Adres prowadzi do sieci prywatnej lub lokalnej.");
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
@@ -79,5 +109,92 @@ public sealed class UrlSafetyValidatorTests
 
         result.IsValid.Should().BeFalse();
         result.ErrorMessage.Should().Be("Adres prowadzi do sieci prywatnej lub lokalnej.");
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ShouldReturnSuccess_WhenDnsResolvesToPublicIpAddress()
+    {
+        var url = "https://example.com";
+
+        _dnsResolverMock
+            .Setup(x => x.GetHostAddressesAsync("example.com", It.IsAny<CancellationToken>()))
+            .ReturnsAsync([IPAddress.Parse("93.184.216.34")]);
+
+        var result = await _validator.ValidateAsync(url);
+
+        result.IsValid.Should().BeTrue();
+        result.ErrorMessage.Should().BeNull();
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync("example.com", It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Theory]
+    [InlineData("127.0.0.1")]
+    [InlineData("10.0.0.1")]
+    [InlineData("172.16.0.1")]
+    [InlineData("172.31.255.255")]
+    [InlineData("192.168.1.10")]
+    [InlineData("169.254.1.1")]
+    public async Task ValidateAsync_ShouldReturnFailure_WhenDnsResolvesToPrivateOrLocalIpAddress(string ip)
+    {
+        var url = "https://example.com";
+
+        _dnsResolverMock
+            .Setup(x => x.GetHostAddressesAsync("example.com", It.IsAny<CancellationToken>()))
+            .ReturnsAsync([IPAddress.Parse(ip)]);
+
+        var result = await _validator.ValidateAsync(url);
+
+        result.IsValid.Should().BeFalse();
+        result.ErrorMessage.Should().Be("Adres prowadzi do sieci prywatnej lub lokalnej.");
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ShouldReturnFailure_WhenDnsResolutionFails()
+    {
+        var url = "https://example.com";
+
+        _dnsResolverMock
+            .Setup(x => x.GetHostAddressesAsync("example.com", It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new System.Net.Sockets.SocketException());
+
+        var result = await _validator.ValidateAsync(url);
+
+        result.IsValid.Should().BeFalse();
+        result.ErrorMessage.Should().Be("Nie udało się rozwiązać adresu hosta.");
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ShouldNotCallDnsResolver_WhenHostIsDirectIpAddress()
+    {
+        var url = "https://93.184.216.34";
+
+        var result = await _validator.ValidateAsync(url);
+
+        result.IsValid.Should().BeTrue();
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ShouldNotCallDnsResolver_WhenUrlIsInvalid()
+    {
+        var url = "not-a-url";
+
+        var result = await _validator.ValidateAsync(url);
+
+        result.IsValid.Should().BeFalse();
+
+        _dnsResolverMock.Verify(
+            x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 }

@@ -8,10 +8,12 @@ namespace LinkScanner.Infrastructure.Validation;
 public sealed class UrlSafetyValidator : IUrlSafetyValidator
 {
     private readonly ILogger<UrlSafetyValidator> _logger;
+    private readonly IDnsResolver _dnsResolver;
 
-    public UrlSafetyValidator(ILogger<UrlSafetyValidator> logger)
+    public UrlSafetyValidator(ILogger<UrlSafetyValidator> logger, IDnsResolver dnsResolver)
     {
         _logger = logger;
+        _dnsResolver = dnsResolver;
     }
 
     public async Task<UrlSafetyValidationResult> ValidateAsync(string url, CancellationToken cancellationToken = default)
@@ -37,11 +39,21 @@ public sealed class UrlSafetyValidator : IUrlSafetyValidator
             return UrlSafetyValidationResult.Failure("Nie można skanować localhost.");
         }
 
+        if(IPAddress.TryParse(uri.Host, out var directIp))
+        {
+            if(IsPrivateOrLocalAddress(directIp))
+            {
+                return UrlSafetyValidationResult.Failure("Adres prowadzi do sieci prywatnej lub lokalnej.");
+            }
+
+            return UrlSafetyValidationResult.Success();
+        }
+
         IPAddress[] addresses;
 
         try
         {
-            addresses = await Dns.GetHostAddressesAsync(uri.Host, cancellationToken);
+            addresses = await _dnsResolver.GetHostAddressesAsync(uri.Host, cancellationToken);
         }
         catch(Exception ex)
         {
@@ -49,46 +61,38 @@ public sealed class UrlSafetyValidator : IUrlSafetyValidator
             return UrlSafetyValidationResult.Failure("Nie udało się rozwiązać adresu hosta.");
         }
 
-        foreach (var ip in addresses)
+        if (addresses.Any(IsPrivateOrLocalAddress))
         {
-            if (IsPrivateOrLocalIp(ip))
-            {
-                _logger.LogWarning("Blocked private or local IP address. Url: {Url}, IP: {IpAddress}", url, ip);
-                return UrlSafetyValidationResult.Failure("Adres prowadzi do sieci prywatnej lub lokalnej.");
-            }
+            return UrlSafetyValidationResult.Failure("Adres prowadzi do sieci prywatnej lub lokalnej.");
         }
+
 
         return UrlSafetyValidationResult.Success();
     }
 
-    private static bool IsPrivateOrLocalIp(IPAddress ip)
+    private static bool IsPrivateOrLocalAddress(IPAddress ipAddress)
     {
-        if (IPAddress.IsLoopback(ip))
-        {
+        if (IPAddress.IsLoopback(ipAddress))
             return true;
-        }
 
-        if (ip.AddressFamily == AddressFamily.InterNetwork)
+        if (ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
         {
-            var bytes = ip.GetAddressBytes();
+            var bytes = ipAddress.GetAddressBytes();
 
-            return
-                bytes[0] == 10 ||
-                bytes[0] == 127 ||
-                bytes[0] == 0 ||
-                bytes[0] == 169 && bytes[1] == 254 ||
-                bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31 ||
-                bytes[0] == 192 && bytes[1] == 168;
+            return bytes[0] == 10
+                   || bytes[0] == 127
+                   || bytes[0] == 169 && bytes[1] == 254
+                   || bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31
+                   || bytes[0] == 192 && bytes[1] == 168;
         }
 
-        if (ip.AddressFamily == AddressFamily.InterNetworkV6)
+        if (ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
         {
-            return ip.IsIPv6LinkLocal ||
-                   ip.IsIPv6SiteLocal ||
-                   ip.IsIPv6Multicast ||
-                   ip.Equals(IPAddress.IPv6Loopback);
+            return ipAddress.IsIPv6LinkLocal
+                   || ipAddress.IsIPv6SiteLocal
+                   || ipAddress.Equals(IPAddress.IPv6Loopback);
         }
 
-        return true;
+        return false;
     }
 }

@@ -36,6 +36,8 @@ public static class DependencyInjection
                 AllowAutoRedirect = false
             });
 
+        services.AddSingleton<IDnsResolver, SystemDnsResolver>();
+
         return services;
     }
 }
