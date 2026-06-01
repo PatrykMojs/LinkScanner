@@ -4,7 +4,7 @@ namespace LinkScannerApp.Extensions;
 
 public static class SecurityHeadersExtensions
 {
-    public static IApplicationBuilder UsesecurityHeaders(this IApplicationBuilder app)
+    public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder app)
     {
         return app.UseMiddleware<SecurityHeadersMiddleware>();
     }

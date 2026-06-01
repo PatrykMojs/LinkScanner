@@ -49,7 +49,7 @@ try
                 factory: _ => new FixedWindowRateLimiterOptions
                 {
                     PermitLimit = rateLimitOptions.ScanPermitLimit,
-                    Window = TimeSpan.FromMinutes(rateLimitOptions.WindowSeconds),
+                    Window = TimeSpan.FromSeconds(rateLimitOptions.WindowSeconds),
                     QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                     QueueLimit = rateLimitOptions.QueueLimit
                 });
@@ -101,7 +101,7 @@ try
     app.UseGlobalExceptionHandling();
 
     app.UseHttpsRedirection();
-    app.UsesecurityHeaders();
+    app.UseSecurityHeaders();
 
     app.UseRequestBodySizeLimit();
 
