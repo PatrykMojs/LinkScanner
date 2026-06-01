@@ -1,8 +1,10 @@
 using FluentAssertions;
 using LinkScanner.Application.Abstractions;
+using LinkScanner.Application.Options;
 using LinkScanner.Infrastructure.Scanning.Analyzers;
 using LinkScanner.Infrastructure.Scanning.Http;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace LinkScanner.Tests.Infrastructure.Scanning.Analyzers;
@@ -15,10 +17,7 @@ public sealed class RedirectAnalyzerTests
 
     public RedirectAnalyzerTests()
     {
-        _analyzer = new RedirectAnalyzer(
-            NullLogger<RedirectAnalyzer>.Instance,
-            _urlSafetyValidatorMock.Object,
-            _redirectHttpClientMock.Object);
+        _analyzer = CreateAnalyzer();
     }
 
     [Fact]
@@ -56,11 +55,11 @@ public sealed class RedirectAnalyzerTests
         _urlSafetyValidatorMock
             .Setup(x => x.ValidateAsync(nextUrl, It.IsAny<CancellationToken>()))
             .ReturnsAsync(UrlSafetyValidationResult.Success());
-        
+
         var result = await _analyzer.AnalyzeAsync(url);
 
         result.Should().ContainSingle();
-        result[0].Should().Be("301 => https://example.com/login");
+        result[0].Should().Be("301 -> https://example.com/login");
 
         _urlSafetyValidatorMock.Verify(
             x => x.ValidateAsync(nextUrl, It.IsAny<CancellationToken>()),
@@ -88,7 +87,7 @@ public sealed class RedirectAnalyzerTests
         var result = await _analyzer.AnalyzeAsync(url);
 
         result.Should().ContainSingle();
-        result[0].Should().Be("302 => https://example.com/login");
+        result[0].Should().Be("302 -> https://example.com/login");
 
         _urlSafetyValidatorMock.Verify(
             x => x.ValidateAsync(resolvedUrl, It.IsAny<CancellationToken>()),
@@ -102,7 +101,7 @@ public sealed class RedirectAnalyzerTests
         var blockedUrl = "http://localhost/admin";
         var errorMessage = "Nie można skanować localhost.";
 
-         _redirectHttpClientMock
+        _redirectHttpClientMock
             .Setup(x => x.SendAsync(url, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RedirectHttpResult(302, new Uri(blockedUrl)));
 
@@ -125,8 +124,10 @@ public sealed class RedirectAnalyzerTests
     }
 
     [Fact]
-    public async Task AnalyzeAsync_ShouldStopAfterMaxHops()
+    public async Task AnalyzeAsync_ShouldStopAfterConfiguredMaxRedirects()
     {
+        var analyzer = CreateAnalyzer(maxRedirects: 1);
+
         var firstUrl = "https://example.com/1";
         var secondUrl = "https://example.com/2";
         var thirdUrl = "https://example.com/3";
@@ -143,10 +144,10 @@ public sealed class RedirectAnalyzerTests
             .Setup(x => x.ValidateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(UrlSafetyValidationResult.Success());
 
-        var result = await _analyzer.AnalyzeAsync(firstUrl, maxHops: 1);
+        var result = await analyzer.AnalyzeAsync(firstUrl);
 
         result.Should().ContainSingle();
-        result[0].Should().Be("301 => https://example.com/2");
+        result[0].Should().Be("301 -> https://example.com/2");
 
         _redirectHttpClientMock.Verify(
             x => x.SendAsync(firstUrl, It.IsAny<CancellationToken>()),
@@ -155,5 +156,23 @@ public sealed class RedirectAnalyzerTests
         _redirectHttpClientMock.Verify(
             x => x.SendAsync(secondUrl, It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    private RedirectAnalyzer CreateAnalyzer(int maxRedirects = 5)
+    {
+        var options = Options.Create(new LinkScannerOptions
+        {
+            HttpTimeoutSeconds = 8,
+            MaxRedirects = maxRedirects,
+            MaxHtmlBytes = 1_000_000,
+            MaxUrlLength = 2048,
+            AllowedPorts = [80, 443]
+        });
+
+        return new RedirectAnalyzer(
+            NullLogger<RedirectAnalyzer>.Instance,
+            _urlSafetyValidatorMock.Object,
+            _redirectHttpClientMock.Object,
+            options);
     }
 }

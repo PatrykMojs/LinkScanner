@@ -1,6 +1,8 @@
 using FluentAssertions;
 using LinkScanner.Infrastructure.Validation;
+using LinkScanner.Application.Options;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Net;
 
@@ -13,9 +15,19 @@ public sealed class UrlSafetyValidatorTests
 
     public UrlSafetyValidatorTests()
     {
+        var options = Options.Create(new LinkScannerOptions
+        {
+            HttpTimeoutSeconds = 8,
+            MaxRedirects = 5,
+            MaxHtmlBytes = 1_000_000,
+            MaxUrlLength = 2048,
+            AllowedPorts = [80, 443]
+        });
+
         _validator = new UrlSafetyValidator(
             NullLogger<UrlSafetyValidator>.Instance,
-            _dnsResolverMock.Object);
+            _dnsResolverMock.Object,
+            options);
     }
 
     [Theory]
@@ -196,5 +208,16 @@ public sealed class UrlSafetyValidatorTests
         _dnsResolverMock.Verify(
             x => x.GetHostAddressesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Theory]
+    [InlineData("https://user:pass@example.com")]
+    [InlineData("http://admin:secret@example.com")]
+    public async Task ValidateAsync_ShouldReturnFailure_WhenUrlContainsUserInfo(string url)
+    {
+        var result = await _validator.ValidateAsync(url);
+
+        result.IsValid.Should().BeFalse();
+        result.ErrorMessage.Should().Be("Adres URL nie może zawierać danych logowania.");
     }
 }

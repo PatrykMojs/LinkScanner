@@ -25,7 +25,7 @@ try
     builder.Services.AddControllers();
 
     builder.Services.AddApplication();
-    builder.Services.AddInfrastructure();
+    builder.Services.AddInfrastructure(builder.Configuration);
 
     builder.Services.AddRateLimiter(options =>
     {

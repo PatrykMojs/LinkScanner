@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Text;
+using LinkScanner.Application.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LinkScanner.Infrastructure.Scanning.Http;
 
@@ -8,13 +10,15 @@ public sealed class HttpPageFetcher
 {
     private readonly ILogger<HttpPageFetcher> _logger;
     private readonly HttpClient _httpClient;
+    private readonly LinkScannerOptions _options;
 
-    public HttpPageFetcher(ILogger<HttpPageFetcher> logger, HttpClient httpClient)
+    public HttpPageFetcher(ILogger<HttpPageFetcher> logger, 
+        HttpClient httpClient, 
+        IOptions<LinkScannerOptions> options)
     {
         _logger = logger;
         _httpClient = httpClient;
-        _httpClient.Timeout = TimeSpan.FromSeconds(8);
-        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
+        _options = options.Value;
     }
 
     public async Task<HttpPageFetchResult> FetchAsync(string url, CancellationToken cancellationToken = default)
@@ -38,21 +42,24 @@ public sealed class HttpPageFetcher
 
         var loadTimer = Stopwatch.StartNew();
 
-        var html = await response.Content.ReadAsStringAsync(cancellationToken);
+        var htmlBytes = await ReadLimitedContentAsync(
+            response.Content,
+            _options.MaxHtmlBytes,
+            cancellationToken);
 
         loadTimer.Stop();
 
-        _logger.LogDebug(
-            "Fetched page. Url: {Url}, StatusCode: {StatusCode}, TTFB: {TtfbMs}ms, LoadTime: {LoadTimeMs}ms, HtmlBytes: {HtmlBytes}",
+        var html = Encoding.UTF8.GetString(htmlBytes);
+
+        _logger.LogDebug("Fetched page. Url: {Url}, StatusCode: {StatusCode}, TTFB: {TtfbMs}ms, LoadTime: {LoadTimeMs}ms, HtmlBytes: {HtmlBytes}",
             url,
             (int)response.StatusCode,
             (int)Math.Round(ttfb.Elapsed.TotalMilliseconds),
             (int)Math.Round(loadTimer.Elapsed.TotalMilliseconds),
-            Encoding.UTF8.GetByteCount(html));
+            htmlBytes.Length);
 
         return new HttpPageFetchResult
         {
-            Response = response,
             StatusCode = (int)response.StatusCode,
             ContentType = response.Content.Headers.ContentType?.MediaType,
             HttpVersion = response.Version.ToString(),
@@ -64,10 +71,40 @@ public sealed class HttpPageFetcher
                 : null,
             TtfbMs = (int)Math.Round(ttfb.Elapsed.TotalMilliseconds),
             LoadTime = loadTimer.Elapsed,
-            HtmlBytes = Encoding.UTF8.GetByteCount(html),
+            HtmlBytes = htmlBytes.Length,
             Html = html,
             RawHeaders = rawHeaders,
-            RawContentHeaders = rawContentHeaders
+            RawContentHeaders = rawContentHeaders,
+            Response = response
         };
+    }
+
+    private static async Task<byte[]> ReadLimitedContentAsync(
+        HttpContent content,
+        int maxBytes,
+        CancellationToken cancellationToken)
+    {
+        await using var stream = await content.ReadAsStreamAsync(cancellationToken);
+        using var memoryStream = new MemoryStream();
+
+        var buffer = new byte[8192];
+        var totalBytes = 0;
+
+        while(true)
+        {
+            var read = await stream.ReadAsync(buffer, cancellationToken);
+
+            if(read == 0)
+                break;
+
+            totalBytes += read;
+
+            if(totalBytes > maxBytes)
+                throw new InvalidOperationException($"HTTP response body exceeded the configured limit of {maxBytes} bytes.");
+
+            memoryStream.Write(buffer, 0, read);
+        }
+
+        return memoryStream.ToArray(); 
     }
 }

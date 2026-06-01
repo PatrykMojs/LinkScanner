@@ -1,16 +1,21 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using LinkScanner.Application.Abstractions;
 using LinkScanner.Infrastructure.Scanning;
 using LinkScanner.Infrastructure.Scanning.Analyzers;
 using LinkScanner.Infrastructure.Scanning.Http;
 using LinkScanner.Infrastructure.Validation;
+using LinkScanner.Application.Options;
+using Microsoft.Extensions.Options;
 
 namespace LinkScanner.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<LinkScannerOptions>(configuration.GetSection(LinkScannerOptions.SectionName));
+       
         services.AddScoped<ILinkScanner, LinkScannerService>();
         services.AddHttpClient<HttpPageFetcher>();
 
@@ -26,9 +31,28 @@ public static class DependencyInjection
         services.AddScoped<HttpPageFetcher>();
 
         services
-            .AddHttpClient<IRedirectHttpClient, RedirectHttpClient>(client =>
+            .AddHttpClient<HttpPageFetcher>((serviceProvider, client) =>
             {
-                client.Timeout = TimeSpan.FromSeconds(8);
+                var options = serviceProvider
+                    .GetRequiredService<IOptions<LinkScannerOptions>>()
+                    .Value;
+                
+                client.Timeout = TimeSpan.FromSeconds(options.HttpTimeoutSeconds);
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false
+            });
+
+        services
+            .AddHttpClient<IRedirectHttpClient, RedirectHttpClient>((serviceProvider, client) =>
+            {
+                var options = serviceProvider
+                    .GetRequiredService<IOptions<LinkScannerOptions>>()
+                    .Value;
+
+                client.Timeout = TimeSpan.FromSeconds(options.HttpTimeoutSeconds);
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
             })
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
