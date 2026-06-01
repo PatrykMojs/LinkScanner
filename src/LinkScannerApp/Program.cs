@@ -1,6 +1,7 @@
 using System.Threading.RateLimiting;
 using LinkScanner.Application;
 using LinkScanner.Infrastructure;
+using LinkScannerApp.Extensions;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -67,14 +68,16 @@ try
 
     var app = builder.Build();
 
-
     if (!app.Environment.IsDevelopment())
     {
-        app.UseExceptionHandler("/Error");
         app.UseHsts();
     }
 
+    app.UseGlobalExceptionHandling();
+
     app.UseHttpsRedirection();
+    app.UsesecurityHeaders();
+
     app.UseStaticFiles();
 
     app.UseSerilogRequestLogging(options =>
