@@ -106,11 +106,11 @@ public sealed class UrlSafetyValidator : IUrlSafetyValidator
 
     private bool IsAllowedPort(Uri uri)
     {
-        if(uri.IsDefaultPort)
+        if (uri.IsDefaultPort)
         {
             return true;
         }
-        
+
         return _options.AllowedPorts.Contains(uri.Port);
     }
 

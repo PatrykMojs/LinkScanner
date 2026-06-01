@@ -12,8 +12,8 @@ public sealed class HttpPageFetcher
     private readonly HttpClient _httpClient;
     private readonly LinkScannerOptions _options;
 
-    public HttpPageFetcher(ILogger<HttpPageFetcher> logger, 
-        HttpClient httpClient, 
+    public HttpPageFetcher(ILogger<HttpPageFetcher> logger,
+        HttpClient httpClient,
         IOptions<LinkScannerOptions> options)
     {
         _logger = logger;
@@ -90,21 +90,21 @@ public sealed class HttpPageFetcher
         var buffer = new byte[8192];
         var totalBytes = 0;
 
-        while(true)
+        while (true)
         {
             var read = await stream.ReadAsync(buffer, cancellationToken);
 
-            if(read == 0)
+            if (read == 0)
                 break;
 
             totalBytes += read;
 
-            if(totalBytes > maxBytes)
+            if (totalBytes > maxBytes)
                 throw new InvalidOperationException($"HTTP response body exceeded the configured limit of {maxBytes} bytes.");
 
             memoryStream.Write(buffer, 0, read);
         }
 
-        return memoryStream.ToArray(); 
+        return memoryStream.ToArray();
     }
 }

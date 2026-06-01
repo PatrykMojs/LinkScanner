@@ -13,9 +13,9 @@ public sealed class RedirectAnalyzer
     private readonly IRedirectHttpClient _redirectHttpClient;
     private readonly LinkScannerOptions _options;
 
-    public RedirectAnalyzer(ILogger<RedirectAnalyzer> logger, 
-    IUrlSafetyValidator urlSafetyValidator, 
-    IRedirectHttpClient redirectHttpClient, 
+    public RedirectAnalyzer(ILogger<RedirectAnalyzer> logger,
+    IUrlSafetyValidator urlSafetyValidator,
+    IRedirectHttpClient redirectHttpClient,
     IOptions<LinkScannerOptions> options)
     {
         _logger = logger;
@@ -23,17 +23,17 @@ public sealed class RedirectAnalyzer
         _redirectHttpClient = redirectHttpClient;
         _options = options.Value;
     }
-   
+
     public async Task<List<string>> AnalyzeAsync(string url, CancellationToken cancellationToken = default, int maxHops = 5)
     {
         var redirects = new List<string>();
         var current = url;
 
-        for(var i = 0; i< _options.MaxRedirects; i++)
+        for (var i = 0; i < _options.MaxRedirects; i++)
         {
             var response = await _redirectHttpClient.SendAsync(current, cancellationToken);
 
-            if(response.Location is not { } location)
+            if (response.Location is not { } location)
                 break;
 
             var next = location.IsAbsoluteUri
@@ -42,7 +42,7 @@ public sealed class RedirectAnalyzer
 
             var validation = await _urlSafetyValidator.ValidateAsync(next, cancellationToken);
 
-            if(!validation.IsValid)
+            if (!validation.IsValid)
             {
                 redirects.Add($"{response.StatusCode} -> BLOCKED: {validation.ErrorMessage}");
 

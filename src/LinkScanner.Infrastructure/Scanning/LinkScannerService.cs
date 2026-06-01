@@ -65,7 +65,7 @@ public sealed class LinkScannerService : ILinkScanner
             result.LoadTime = page.LoadTime;
             result.HtmlBytes = page.HtmlBytes;
             result.Headers = _securityHeadersAnalyzer.Analyze(page.Response);
-            
+
             _logger.LogDebug("HTTP page fetched for URL {Url}. StatusCode: {StatusCode}, TTFB: {TtfbMs}ms", url, result.StatusCode, result.TtfbMs);
 
             var metadata = _htmlMetadataExtractor.Extract(page.Html, url);
@@ -94,17 +94,17 @@ public sealed class LinkScannerService : ILinkScanner
 
             result.RiskScore = _riskScoreCalculator.Calculate(url, result);
             result.IsSafe = _safetyDecisionAnalyzer.IsSafe(url, result);
-       
+
             _logger.LogInformation("Finished scan for URL: {Url}. IsSafe: {IsSafe}, RiskScore: {RiskScore}, StatusCode: {StatusCode}", url, result.IsSafe, result.RiskScore, result.StatusCode);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Scan failed for URL: {Url}", url);
 
             result.IsSafe = false;
             result.RiskScore = 90;
         }
-        
+
         return result;
     }
 }

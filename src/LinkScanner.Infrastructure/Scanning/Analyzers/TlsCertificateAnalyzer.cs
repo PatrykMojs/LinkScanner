@@ -12,7 +12,7 @@ public sealed class TlsCertificateAnalyzer
         {
             var uri = new Uri(url);
 
-            if(uri.Scheme != Uri.UriSchemeHttps)
+            if (uri.Scheme != Uri.UriSchemeHttps)
                 return null;
 
             using var client = new TcpClient();

@@ -18,7 +18,7 @@ try
         configuration
             .ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
-            .Enrich.FromLogContext(); 
+            .Enrich.FromLogContext();
     });
 
     builder.Services.AddRazorPages();
@@ -76,7 +76,7 @@ try
 
     app.UseHttpsRedirection();
     app.UseStaticFiles();
-    
+
     app.UseSerilogRequestLogging(options =>
     {
         options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
@@ -92,7 +92,7 @@ try
 
     app.Run();
 }
-catch(Exception ex)
+catch (Exception ex)
 {
     Log.Fatal(ex, "LinkScanner application terminated unexpectedly");
 }

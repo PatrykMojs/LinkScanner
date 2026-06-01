@@ -220,7 +220,7 @@ public sealed class HtmlMetadataExtractorTests
         result.MixedContent.Should().BeTrue();
     }
 
-     [Fact]
+    [Fact]
     public void Extract_ShouldDetectMixedContent_WhenHttpsPageContainsHttpLink()
     {
         var html = """
