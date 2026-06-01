@@ -2,6 +2,7 @@ using System.Threading.RateLimiting;
 using LinkScanner.Application;
 using LinkScanner.Infrastructure;
 using LinkScannerApp.Extensions;
+using LinkScannerApp.Options;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -28,6 +29,15 @@ try
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
+    builder.Services.Configure<AppRateLimitOptions>(
+    builder.Configuration.GetSection(AppRateLimitOptions.SectionName));
+
+    builder.Services.Configure<RequestLimitsOptions>(builder.Configuration.GetSection(RequestLimitsOptions.SectionName));
+
+    var rateLimitOptions = builder.Configuration
+        .GetSection(AppRateLimitOptions.SectionName)
+        .Get<AppRateLimitOptions>() ?? new AppRateLimitOptions();
+
     builder.Services.AddRateLimiter(options =>
     {
         options.AddPolicy("ScanPolicy", httpContext =>
@@ -38,10 +48,10 @@ try
                 partitionKey: ip,
                 factory: _ => new FixedWindowRateLimiterOptions
                 {
-                    PermitLimit = 10,
-                    Window = TimeSpan.FromMinutes(1),
+                    PermitLimit = rateLimitOptions.ScanPermitLimit,
+                    Window = TimeSpan.FromMinutes(rateLimitOptions.WindowSeconds),
                     QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                    QueueLimit = 0
+                    QueueLimit = rateLimitOptions.QueueLimit
                 });
         });
 
@@ -58,11 +68,26 @@ try
             var method = context.HttpContext.Request.Method;
             var userAgent = context.HttpContext.Request.Headers.UserAgent.ToString();
 
-            logger.LogWarning("Rate limit exceeded. IP: {IpAddress}, Method: {Method}, Path: {Path}, UserAgent: {UserAgent}", ip, method, path, userAgent);
+            context.HttpContext.Response.Headers.RetryAfter = rateLimitOptions.WindowSeconds.ToString();
+
+            logger.LogWarning("Rate limit exceeded. IP: {IpAddress}, Method: {Method}, Path: {Path}, UserAgent: {UserAgent}, RetryAfterSeconds: {RetryAfterSeconds}",
+                ip,
+                method,
+                path,
+                userAgent,
+                rateLimitOptions.WindowSeconds);
 
             context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+            context.HttpContext.Response.ContentType = "application/problem+json";
 
-            await context.HttpContext.Response.WriteAsync("Wykonano zbyt wiele skanów. Spróbuj ponownie za chwilę.", token);
+            await context.HttpContext.Response.WriteAsJsonAsync(new
+            {
+                title = "Too many requests.",
+                status = StatusCodes.Status429TooManyRequests,
+                detail = "Wykonano zbyt wiele skanów. Spróbuj ponownie za chwilę.",
+                retryAfterSeconds = rateLimitOptions.WindowSeconds,
+                traceId = context.HttpContext.TraceIdentifier
+            }, token);
         };
     });
 
@@ -77,6 +102,8 @@ try
 
     app.UseHttpsRedirection();
     app.UsesecurityHeaders();
+
+    app.UseRequestBodySizeLimit();
 
     app.UseStaticFiles();
 
