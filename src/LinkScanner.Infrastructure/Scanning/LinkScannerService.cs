@@ -1,5 +1,6 @@
 using LinkScanner.Application.Abstractions;
 using LinkScanner.Application.Abstractions.Caching;
+using LinkScanner.Application.Abstractions.Scanning;
 using LinkScanner.Application.Options;
 using LinkScanner.Domain.Entities;
 using LinkScanner.Infrastructure.Scanning.Analyzers;
@@ -23,6 +24,7 @@ public sealed class LinkScannerService : ILinkScanner
 
     private readonly IScanResultCache _scanResultCache;
     private readonly LinkScannerOptions _options;
+    private readonly IScanConcurrencyLimiter _scanConcurrencyLimiter;
 
     public LinkScannerService(ILogger<LinkScannerService> logger,
         SecurityHeadersAnalyzer securityHeadersAnalyzer,
@@ -34,7 +36,8 @@ public sealed class LinkScannerService : ILinkScanner
         HttpPageFetcher httpPageFetcher,
         SafetyDecisionAnalyzer safetyDecisionAnalyzer, 
         IScanResultCache scanResultCache, 
-        IOptions<LinkScannerOptions> options)
+        IOptions<LinkScannerOptions> options,
+        IScanConcurrencyLimiter scanConcurrencyLimiter)
     {
         _logger = logger;
         _securityHeadersAnalyzer = securityHeadersAnalyzer;
@@ -47,6 +50,7 @@ public sealed class LinkScannerService : ILinkScanner
         _safetyDecisionAnalyzer = safetyDecisionAnalyzer;
         _scanResultCache = scanResultCache;
         _options = options.Value;
+        _scanConcurrencyLimiter = scanConcurrencyLimiter;
     }
 
     public async Task<LinkScanResult> ScanAsync(string url, CancellationToken cancellationToken = default)
@@ -68,6 +72,23 @@ public sealed class LinkScannerService : ILinkScanner
             cachedResult.CacheExpiresAt = cached.CacheExpiresAt;
 
             return cachedResult;
+        }
+
+        using var scanLease = await _scanConcurrencyLimiter.TryAcquireAsync(cancellationToken);
+
+        if(scanLease is null)
+        {
+            _logger.LogWarning("Scan rejected because the maximum number of concurrent scans has been reached. Url: {Url}", url);
+
+            return new LinkScanResult
+            {
+                Url = url,
+                IsSafe = false,
+                RiskScore = 90,
+                FromCache = false,
+                ScannedAt = DateTimeOffset.UtcNow,
+                CacheExpiresAt = null
+            };
         }
 
         var scannedAt = DateTimeOffset.UtcNow;

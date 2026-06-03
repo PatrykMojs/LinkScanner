@@ -9,4 +9,5 @@ public sealed class LinkScannerOptions
     public int MaxUrlLength { get; init; } = 2048;
     public int[] AllowedPorts { get; init; } = [80, 443];
     public int CacheTtlMinutes { get; init; } = 10;
+    public int MaxConcurrentScans { get; init; } = 3;
 }

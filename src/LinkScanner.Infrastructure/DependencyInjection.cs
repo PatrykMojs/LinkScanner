@@ -8,6 +8,7 @@ using LinkScanner.Infrastructure.Validation;
 using LinkScanner.Application.Abstractions;
 using LinkScanner.Application.Options;
 using LinkScanner.Application.Abstractions.Caching;
+using LinkScanner.Application.Abstractions.Scanning;
 using LinkScanner.Infrastructure.Caching;
 
 namespace LinkScanner.Infrastructure;
@@ -20,6 +21,7 @@ public static class DependencyInjection
 
         services.AddMemoryCache();
         services.AddSingleton<IScanResultCache, InMemoryScanResultCache>();
+        services.AddSingleton<IScanConcurrencyLimiter, SemaphoreScanConcurrencyLimiter>();
 
         services.AddScoped<ILinkScanner, LinkScannerService>();
         services.AddScoped<IUrlSafetyValidator, UrlSafetyValidator>();
