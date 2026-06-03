@@ -625,8 +625,8 @@ This project demonstrates:
 
 ## Author
 
-**Patryk Mojs**  
-GitHub: [PatrykMojs](https://github.com/PatrykMojs)
+**Patryk Meus**  
+GitHub: [Patrykeus](https://github.com/PatrykMojs)
 
 ---
 
