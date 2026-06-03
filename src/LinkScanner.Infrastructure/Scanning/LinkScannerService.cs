@@ -1,8 +1,11 @@
 using LinkScanner.Application.Abstractions;
+using LinkScanner.Application.Abstractions.Caching;
+using LinkScanner.Application.Options;
 using LinkScanner.Domain.Entities;
 using LinkScanner.Infrastructure.Scanning.Analyzers;
 using LinkScanner.Infrastructure.Scanning.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LinkScanner.Infrastructure.Scanning;
 
@@ -18,6 +21,9 @@ public sealed class LinkScannerService : ILinkScanner
     private readonly HttpPageFetcher _httpPageFetcher;
     private readonly SafetyDecisionAnalyzer _safetyDecisionAnalyzer;
 
+    private readonly IScanResultCache _scanResultCache;
+    private readonly LinkScannerOptions _options;
+
     public LinkScannerService(ILogger<LinkScannerService> logger,
         SecurityHeadersAnalyzer securityHeadersAnalyzer,
         HostIpResolver hostIpResolver,
@@ -26,7 +32,9 @@ public sealed class LinkScannerService : ILinkScanner
         TlsCertificateAnalyzer tlsCertificateAnalyzer,
         HtmlMetadataExtractor htmlMetadataExtractor,
         HttpPageFetcher httpPageFetcher,
-        SafetyDecisionAnalyzer safetyDecisionAnalyzer)
+        SafetyDecisionAnalyzer safetyDecisionAnalyzer, 
+        IScanResultCache scanResultCache, 
+        IOptions<LinkScannerOptions> options)
     {
         _logger = logger;
         _securityHeadersAnalyzer = securityHeadersAnalyzer;
@@ -37,11 +45,42 @@ public sealed class LinkScannerService : ILinkScanner
         _htmlMetadataExtractor = htmlMetadataExtractor;
         _httpPageFetcher = httpPageFetcher;
         _safetyDecisionAnalyzer = safetyDecisionAnalyzer;
+        _scanResultCache = scanResultCache;
+        _options = options.Value;
     }
 
     public async Task<LinkScanResult> ScanAsync(string url, CancellationToken cancellationToken = default)
     {
-        var result = new LinkScanResult { Url = url };
+        var cacheKey = BuildCacheKey(url);
+        var cached = await _scanResultCache.GetAsync<LinkScanResult>(cacheKey, cancellationToken);
+
+        if(cached is not null)
+        {
+            _logger.LogInformation("Returning cached scan result for URL: {Url}. ScannedAt: {ScannedAt}, CacheExpiresAt: {CacheExpiresAt}",
+                url,
+                cached.ScannedAt,
+                cached.CacheExpiresAt);
+
+            var cachedResult = CloneResult(cached.Result);
+
+            cachedResult.FromCache = true;
+            cachedResult.ScannedAt = cached.ScannedAt;
+            cachedResult.CacheExpiresAt = cached.CacheExpiresAt;
+
+            return cachedResult;
+        }
+
+        var scannedAt = DateTimeOffset.UtcNow;
+        var cacheTtl = TimeSpan.FromMinutes(_options.CacheTtlMinutes);
+
+        var result = new LinkScanResult 
+        { 
+            Url = url,
+            FromCache = false,
+            ScannedAt = scannedAt,
+            CacheExpiresAt = scannedAt.Add(cacheTtl) 
+        };
+
         _logger.LogInformation("Starting scan for URL: {Url}", url);
 
         try
@@ -95,6 +134,8 @@ public sealed class LinkScannerService : ILinkScanner
             result.RiskScore = _riskScoreCalculator.Calculate(url, result);
             result.IsSafe = _safetyDecisionAnalyzer.IsSafe(url, result);
 
+            await _scanResultCache.SetAsync(cacheKey, CloneResult(result), scannedAt, cacheTtl, cancellationToken);
+
             _logger.LogInformation("Finished scan for URL: {Url}. IsSafe: {IsSafe}, RiskScore: {RiskScore}, StatusCode: {StatusCode}", url, result.IsSafe, result.RiskScore, result.StatusCode);
         }
         catch (Exception ex)
@@ -106,5 +147,71 @@ public sealed class LinkScannerService : ILinkScanner
         }
 
         return result;
+    }
+
+    private static string BuildCacheKey(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            return $"scan:{url.Trim().ToLowerInvariant()}";
+        }
+
+        var builder = new UriBuilder(uri)
+        {
+            Scheme = uri.Scheme.ToLowerInvariant(),
+            Host = uri.Host.ToLowerInvariant()
+        };
+
+        return $"scan:{builder.Uri.AbsoluteUri}";
+    }
+
+    private static LinkScanResult CloneResult(LinkScanResult source)
+    {
+        return new LinkScanResult
+        {
+            Url = source.Url,
+            IsSafe = source.IsSafe,
+            RiskScore = source.RiskScore,
+
+            StatusCode = source.StatusCode,
+            ContentType = source.ContentType,
+            HttpVersion = source.HttpVersion,
+            ServerHeader = source.ServerHeader,
+            XPoweredBy = source.XPoweredBy,
+            TtfbMs = source.TtfbMs,
+            LoadTime = source.LoadTime,
+            HtmlBytes = source.HtmlBytes,
+
+            Title = source.Title,
+            Description = source.Description,
+            CanonicalUrl = source.CanonicalUrl,
+            FaviconUrl = source.FaviconUrl,
+            LinksCount = source.LinksCount,
+            ScriptsCount = source.ScriptsCount,
+            ImageCount = source.ImageCount,
+            MixedContent = source.MixedContent,
+
+            TlsProtocol = source.TlsProtocol,
+            CertSubject = source.CertSubject,
+            CertIssuer = source.CertIssuer,
+            CertNotAfter = source.CertNotAfter,
+            CertDaysToExpiry = source.CertDaysToExpiry,
+
+            FromCache = source.FromCache,
+            ScannedAt = source.ScannedAt,
+            CacheExpiresAt = source.CacheExpiresAt,
+
+            HostIps = source.HostIps.ToList(),
+            RedirectChain = source.RedirectChain.ToList(),
+            Headers = source.Headers,
+
+            RawHeaders = source.RawHeaders is not null
+                ? source.RawHeaders.ToDictionary(x => x.Key, x => x.Value)
+                : new Dictionary<string, string>(),
+
+            RawContentHeaders = source.RawContentHeaders is not null
+                ? source.RawContentHeaders.ToDictionary(x => x.Key, x => x.Value)
+                : new Dictionary<string, string>()
+        };
     }
 }

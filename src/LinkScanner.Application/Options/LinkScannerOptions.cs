@@ -8,4 +8,5 @@ public sealed class LinkScannerOptions
     public int MaxHtmlBytes { get; init; } = 1_000_000;
     public int MaxUrlLength { get; init; } = 2048;
     public int[] AllowedPorts { get; init; } = [80, 443];
+    public int CacheTtlMinutes { get; init; } = 10;
 }

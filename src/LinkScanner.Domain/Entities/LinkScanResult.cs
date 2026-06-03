@@ -40,4 +40,8 @@ public sealed class LinkScanResult
 
     public Dictionary<string, string>? RawHeaders { get; set; } = new();
     public Dictionary<string, string>? RawContentHeaders { get; set; } = new();
+
+    public bool FromCache { get; set; }
+    public DateTimeOffset ScannedAt { get; set; }
+    public DateTimeOffset? CacheExpiresAt { get; set; }
 }
