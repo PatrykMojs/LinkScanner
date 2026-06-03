@@ -626,7 +626,7 @@ This project demonstrates:
 ## Author
 
 **Patryk Meus**  
-GitHub: [Patrykeus](https://github.com/PatrykMojs)
+GitHub: [PatrykMeus](https://github.com/PatrykMojs)
 
 ---
 
