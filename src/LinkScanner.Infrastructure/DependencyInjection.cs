@@ -5,8 +5,9 @@ using LinkScanner.Infrastructure.Scanning;
 using LinkScanner.Infrastructure.Scanning.Analyzers;
 using LinkScanner.Infrastructure.Scanning.Http;
 using LinkScanner.Infrastructure.Validation;
-using LinkScanner.Application.Abstractions;
+using LinkScanner.Infrastructure.MachineLearning;
 using LinkScanner.Application.Options;
+using LinkScanner.Application.Abstractions;
 using LinkScanner.Application.Abstractions.Caching;
 using LinkScanner.Application.Abstractions.Scanning;
 using LinkScanner.Infrastructure.Caching;
@@ -22,6 +23,9 @@ public static class DependencyInjection
         services.AddMemoryCache();
         services.AddSingleton<IScanResultCache, InMemoryScanResultCache>();
         services.AddSingleton<IScanConcurrencyLimiter, SemaphoreScanConcurrencyLimiter>();
+
+        services.AddSingleton<IThreatClassifier, NoOpThreatClassifier>();
+        services.AddSingleton<IThreatFeatureExtractor, ThreatFeatureExtractor>();
 
         services.AddScoped<ILinkScanner, LinkScannerService>();
         services.AddScoped<IUrlSafetyValidator, UrlSafetyValidator>();

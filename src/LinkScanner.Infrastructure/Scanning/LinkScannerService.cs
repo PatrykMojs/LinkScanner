@@ -26,6 +26,8 @@ public sealed class LinkScannerService : ILinkScanner
     private readonly LinkScannerOptions _options;
     private readonly IScanConcurrencyLimiter _scanConcurrencyLimiter;
 
+    private readonly IThreatClassifier _threatClassifier;
+
     public LinkScannerService(ILogger<LinkScannerService> logger,
         SecurityHeadersAnalyzer securityHeadersAnalyzer,
         HostIpResolver hostIpResolver,
@@ -37,7 +39,8 @@ public sealed class LinkScannerService : ILinkScanner
         SafetyDecisionAnalyzer safetyDecisionAnalyzer, 
         IScanResultCache scanResultCache, 
         IOptions<LinkScannerOptions> options,
-        IScanConcurrencyLimiter scanConcurrencyLimiter)
+        IScanConcurrencyLimiter scanConcurrencyLimiter,
+        IThreatClassifier threatClassifier)
     {
         _logger = logger;
         _securityHeadersAnalyzer = securityHeadersAnalyzer;
@@ -51,6 +54,7 @@ public sealed class LinkScannerService : ILinkScanner
         _scanResultCache = scanResultCache;
         _options = options.Value;
         _scanConcurrencyLimiter = scanConcurrencyLimiter;
+        _threatClassifier = threatClassifier;
     }
 
     public async Task<LinkScanResult> ScanAsync(string url, CancellationToken cancellationToken = default)
@@ -70,6 +74,11 @@ public sealed class LinkScannerService : ILinkScanner
             cachedResult.FromCache = true;
             cachedResult.ScannedAt = cached.ScannedAt;
             cachedResult.CacheExpiresAt = cached.CacheExpiresAt;
+
+            if(cachedResult.AiAssessment is null)
+            {
+                cachedResult.AiAssessment = await _threatClassifier.PredictAsync(cachedResult, cancellationToken);
+            }
 
             return cachedResult;
         }
@@ -154,6 +163,8 @@ public sealed class LinkScannerService : ILinkScanner
 
             result.RiskScore = _riskScoreCalculator.Calculate(url, result);
             result.IsSafe = _safetyDecisionAnalyzer.IsSafe(url, result);
+
+            result.AiAssessment = await _threatClassifier.PredictAsync(result, cancellationToken);
 
             await _scanResultCache.SetAsync(cacheKey, CloneResult(result), scannedAt, cacheTtl, cancellationToken);
 
