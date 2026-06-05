@@ -21,6 +21,11 @@ var data = mlContext.Data.LoadFromTextFile<TrainingLinkData>(
     hasHeader: true,
     separatorChar: ',');
 
+var split = mlContext.Data.TrainTestSplit(
+    data,
+    testFraction: 0.25,
+    seed: 42);
+
 var pipeline = mlContext.Transforms.Concatenate(
         "Features",
         nameof(TrainingLinkData.UrlLength),
@@ -33,28 +38,39 @@ var pipeline = mlContext.Transforms.Concatenate(
         nameof(TrainingLinkData.HasAtSymbol),
         nameof(TrainingLinkData.SubdomainCount),
         nameof(TrainingLinkData.SuspiciousKeywordCount))
-    .Append(mlContext.BinaryClassification.Trainers.FastTree(
+    .Append(mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(
         labelColumnName: nameof(TrainingLinkData.Label),
         featureColumnName: "Features"));
 
 Console.WriteLine("Training model...");
 
-var model = pipeline.Fit(data);
+var model = pipeline.Fit(split.TrainSet);
 
 Console.WriteLine("Evaluating model...");
 
-var predictions = model.Transform(data);
+try
+{
+    var predictions = model.Transform(split.TestSet);
 
-var metrics = mlContext.BinaryClassification.Evaluate(
-    predictions,
-    labelColumnName: nameof(TrainingLinkData.Label));
+    var metrics = mlContext.BinaryClassification.Evaluate(
+        predictions,
+        labelColumnName: nameof(TrainingLinkData.Label));
 
-Console.WriteLine();
-Console.WriteLine("Model metrics:");
-Console.WriteLine($"Accuracy: {metrics.Accuracy:P2}");
-Console.WriteLine($"AUC: {metrics.AreaUnderRocCurve:P2}");
-Console.WriteLine($"F1 Score: {metrics.F1Score:P2}");
-Console.WriteLine();
+    Console.WriteLine();
+    Console.WriteLine("Model metrics on holdout test set:");
+    Console.WriteLine($"Accuracy: {metrics.Accuracy:P2}");
+    Console.WriteLine($"AUC: {metrics.AreaUnderRocCurve:P2}");
+    Console.WriteLine($"F1 Score: {metrics.F1Score:P2}");
+    Console.WriteLine();
+}
+catch (Exception ex)
+{
+    Console.WriteLine();
+    Console.WriteLine("Evaluation warning:");
+    Console.WriteLine("Metrics could not be calculated reliably for this small demo dataset.");
+    Console.WriteLine($"Reason: {ex.Message}");
+    Console.WriteLine();
+}
 
 Console.WriteLine("Saving model...");
 Console.WriteLine($"Model output path: {modelOutputPath}");

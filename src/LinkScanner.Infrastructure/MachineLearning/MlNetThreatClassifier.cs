@@ -7,7 +7,7 @@ namespace LinkScanner.Infrastructure.MachineLearning;
 
 public sealed class MlNetThreatClassifier : IThreatClassifier
 {
-    private const string ModelVersion = "mlnet-demo-v0.1";
+    private const string ModelVersion = "mlnet-demo-v0.2";
 
     private readonly IThreatFeatureExtractor _featureExtractor;
     private readonly PredictionEngine<MlNetLinkThreatInput, MlNetLinkThreatPrediction> _predictionEngine;
