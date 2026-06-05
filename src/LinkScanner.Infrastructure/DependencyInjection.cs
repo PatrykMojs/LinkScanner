@@ -24,7 +24,7 @@ public static class DependencyInjection
         services.AddSingleton<IScanResultCache, InMemoryScanResultCache>();
         services.AddSingleton<IScanConcurrencyLimiter, SemaphoreScanConcurrencyLimiter>();
 
-        services.AddSingleton<IThreatClassifier, NoOpThreatClassifier>();
+        services.AddSingleton<IThreatClassifier, MlNetThreatClassifier>();
         services.AddSingleton<IThreatFeatureExtractor, ThreatFeatureExtractor>();
 
         services.AddScoped<ILinkScanner, LinkScannerService>();
