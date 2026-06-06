@@ -5,6 +5,8 @@ public sealed class LinkScanResult
     public string Url { get; set; } = "";
     public bool IsSafe { get; set; }
 
+    public AiThreatAssessment? AiAssessment { get; set; }
+
     public string? Title { get; set; }
     public string? Description { get; set; }
     public string? FaviconUrl { get; set; }
@@ -40,4 +42,8 @@ public sealed class LinkScanResult
 
     public Dictionary<string, string>? RawHeaders { get; set; } = new();
     public Dictionary<string, string>? RawContentHeaders { get; set; } = new();
+
+    public bool FromCache { get; set; }
+    public DateTimeOffset ScannedAt { get; set; }
+    public DateTimeOffset? CacheExpiresAt { get; set; }
 }

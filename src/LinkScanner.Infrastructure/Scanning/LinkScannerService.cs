@@ -1,134 +1,179 @@
-using HtmlAgilityPack;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Security;
-using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using LinkScanner.Application.Abstractions;
+using LinkScanner.Application.Abstractions.Caching;
+using LinkScanner.Application.Abstractions.Scanning;
+using LinkScanner.Application.Options;
 using LinkScanner.Domain.Entities;
+using LinkScanner.Infrastructure.Scanning.Analyzers;
+using LinkScanner.Infrastructure.Scanning.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LinkScanner.Infrastructure.Scanning;
 
 public sealed class LinkScannerService : ILinkScanner
 {
-    private readonly HttpClient httpClient;
-    private readonly IUrlSafetyValidator urlSafetyValidator;
+    private readonly ILogger<LinkScannerService> _logger;
+    private readonly SecurityHeadersAnalyzer _securityHeadersAnalyzer;
+    private readonly HostIpResolver _hostIpResolver;
+    private readonly RiskScoreCalculator _riskScoreCalculator;
+    private readonly RedirectAnalyzer _redirectAnalyzer;
+    private readonly TlsCertificateAnalyzer _tlsCertificateAnalyzer;
+    private readonly HtmlMetadataExtractor _htmlMetadataExtractor;
+    private readonly HttpPageFetcher _httpPageFetcher;
+    private readonly SafetyDecisionAnalyzer _safetyDecisionAnalyzer;
 
-    public LinkScannerService(HttpClient httpClient, IUrlSafetyValidator urlSafetyValidator)
+    private readonly IScanResultCache _scanResultCache;
+    private readonly LinkScannerOptions _options;
+    private readonly IScanConcurrencyLimiter _scanConcurrencyLimiter;
+
+    private readonly IThreatClassifier _threatClassifier;
+
+    public LinkScannerService(ILogger<LinkScannerService> logger,
+        SecurityHeadersAnalyzer securityHeadersAnalyzer,
+        HostIpResolver hostIpResolver,
+        RiskScoreCalculator riskScoreCalculator,
+        RedirectAnalyzer redirectAnalyzer,
+        TlsCertificateAnalyzer tlsCertificateAnalyzer,
+        HtmlMetadataExtractor htmlMetadataExtractor,
+        HttpPageFetcher httpPageFetcher,
+        SafetyDecisionAnalyzer safetyDecisionAnalyzer, 
+        IScanResultCache scanResultCache, 
+        IOptions<LinkScannerOptions> options,
+        IScanConcurrencyLimiter scanConcurrencyLimiter,
+        IThreatClassifier threatClassifier)
     {
-        this.httpClient = httpClient;
-        this.urlSafetyValidator = urlSafetyValidator;
-
-        this.httpClient.Timeout = TimeSpan.FromSeconds(8);
-        this.httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("LinkScannerApp/1.0");
+        _logger = logger;
+        _securityHeadersAnalyzer = securityHeadersAnalyzer;
+        _hostIpResolver = hostIpResolver;
+        _riskScoreCalculator = riskScoreCalculator;
+        _redirectAnalyzer = redirectAnalyzer;
+        _tlsCertificateAnalyzer = tlsCertificateAnalyzer;
+        _htmlMetadataExtractor = htmlMetadataExtractor;
+        _httpPageFetcher = httpPageFetcher;
+        _safetyDecisionAnalyzer = safetyDecisionAnalyzer;
+        _scanResultCache = scanResultCache;
+        _options = options.Value;
+        _scanConcurrencyLimiter = scanConcurrencyLimiter;
+        _threatClassifier = threatClassifier;
     }
 
     public async Task<LinkScanResult> ScanAsync(string url, CancellationToken cancellationToken = default)
     {
-        var validation = await urlSafetyValidator.ValidateAsync(url);
+        var cacheKey = BuildCacheKey(url);
+        var cached = await _scanResultCache.GetAsync<LinkScanResult>(cacheKey, cancellationToken);
 
-        if (!validation.IsValid)
+        if(cached is not null)
         {
+            _logger.LogInformation("Returning cached scan result for URL: {Url}. ScannedAt: {ScannedAt}, CacheExpiresAt: {CacheExpiresAt}",
+                url,
+                cached.ScannedAt,
+                cached.CacheExpiresAt);
+
+            var cachedResult = CloneResult(cached.Result);
+
+            cachedResult.FromCache = true;
+            cachedResult.ScannedAt = cached.ScannedAt;
+            cachedResult.CacheExpiresAt = cached.CacheExpiresAt;
+
+            if(cachedResult.AiAssessment is null)
+            {
+                cachedResult.AiAssessment = await _threatClassifier.PredictAsync(cachedResult, cancellationToken);
+            }
+
+            return cachedResult;
+        }
+
+        using var scanLease = await _scanConcurrencyLimiter.TryAcquireAsync(cancellationToken);
+
+        if(scanLease is null)
+        {
+            _logger.LogWarning("Scan rejected because the maximum number of concurrent scans has been reached. Url: {Url}", url);
+
             return new LinkScanResult
             {
                 Url = url,
                 IsSafe = false,
-                RiskScore = 100,
-                StatusCode = null,
-                Title = validation.ErrorMessage
+                RiskScore = 90,
+                FromCache = false,
+                ScannedAt = DateTimeOffset.UtcNow,
+                CacheExpiresAt = null
             };
         }
 
-        var result = new LinkScanResult { Url = url };
+        var scannedAt = DateTimeOffset.UtcNow;
+        var cacheTtl = TimeSpan.FromMinutes(_options.CacheTtlMinutes);
+
+        var result = new LinkScanResult 
+        { 
+            Url = url,
+            FromCache = false,
+            ScannedAt = scannedAt,
+            CacheExpiresAt = scannedAt.Add(cacheTtl) 
+        };
+
+        _logger.LogInformation("Starting scan for URL: {Url}", url);
 
         try
         {
-            result.HostIps = await ResolveIpsAsync(url);
+            result.HostIps = await _hostIpResolver.ResolveAsync(url, cancellationToken);
+            _logger.LogDebug("Resolved IP addresses for URL {Url}: {IpCount}", url, result.HostIps.Count);
 
-            result.RedirectChain = await GetRedirectsAsync(url, cancellationToken);
+            result.RedirectChain = await _redirectAnalyzer.AnalyzeAsync(url, cancellationToken);
+            _logger.LogDebug("Redirect chain analyzed for URL {Url}. Redirects count: {RedirectCount}", url, result.RedirectChain.Count);
 
-            var ttfb = new Stopwatch();
-            string html;
-            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
-            {
-                ttfb.Start();
-                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                result.RawHeaders = response.Headers.ToDictionary(h => h.Key, h => string.Join(", ", h.Value));
-                result.RawContentHeaders = response.Content.Headers.ToDictionary(h => h.Key, h => string.Join(", ", h.Value));
-                ttfb.Stop();
+            var page = await _httpPageFetcher.FetchAsync(url, cancellationToken);
 
-                result.StatusCode = (int)response.StatusCode;
-                result.ContentType = response.Content.Headers.ContentType?.MediaType;
-                result.HttpVersion = response.Version.ToString();
-                result.ServerHeader = response.Headers.TryGetValues("server", out var sv) ? sv.FirstOrDefault() : null;
-                result.XPoweredBy = response.Headers.TryGetValues("x-powered-by", out var xp) ? xp.FirstOrDefault() : null;
-                result.TtfbMs = (int)Math.Round(ttfb.Elapsed.TotalMilliseconds);
+            result.RawHeaders = page.RawHeaders;
+            result.RawContentHeaders = page.RawContentHeaders;
+            result.StatusCode = page.StatusCode;
+            result.ContentType = page.ContentType;
+            result.HttpVersion = page.HttpVersion;
+            result.ServerHeader = page.ServerHeader;
+            result.XPoweredBy = page.XPoweredBy;
+            result.TtfbMs = page.TtfbMs;
+            result.LoadTime = page.LoadTime;
+            result.HtmlBytes = page.HtmlBytes;
+            result.Headers = _securityHeadersAnalyzer.Analyze(page.Response);
 
-                var stopWatch = Stopwatch.StartNew();
-                html = await response.Content.ReadAsStringAsync();
-                stopWatch.Stop();
-                result.LoadTime = stopWatch.Elapsed;
-                result.HtmlBytes = System.Text.Encoding.UTF8.GetByteCount(html);
+            _logger.LogDebug("HTTP page fetched for URL {Url}. StatusCode: {StatusCode}, TTFB: {TtfbMs}ms", url, result.StatusCode, result.TtfbMs);
 
-                result.Headers = new SecurityHeaders
-                {
-                    HasCSP = HasHeader(response, "Content-Security-Policy"),
-                    HasHSTS = HasHeader(response, "Strict-Transport-Security"),
-                    HasXFO = HasHeader(response, "X-Frame-Options"),
-                    HasXCTO = HasHeader(response, "X-Content-Type-Options"),
-                    HasReferrerPolicy = HasHeader(response, "Referrer-Policy"),
-                    HasPermissionsPolicy = HasHeader(response, "Permissions-Policy")
-                };
-            }
+            var metadata = _htmlMetadataExtractor.Extract(page.Html, url);
 
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-            string? GetMeta(string name) =>
-                doc.DocumentNode.SelectSingleNode($"//meta[@name='{name}']")?.GetAttributeValue("content", null);
-            string? GetProp(string prop) =>
-                doc.DocumentNode.SelectSingleNode($"//meta[@property='{prop}']")?.GetAttributeValue("content", null);
+            result.Title = metadata.Title;
+            result.Description = metadata.Description;
+            result.CanonicalUrl = metadata.CanonicalUrl;
+            result.FaviconUrl = metadata.FaviconUrl;
+            result.LinksCount = metadata.LinksCount;
+            result.ScriptsCount = metadata.ScriptsCount;
+            result.ImageCount = metadata.ImageCount;
+            result.MixedContent = metadata.MixedContent;
 
-            result.Title = doc.DocumentNode.SelectSingleNode("//title")?.InnerText?.Trim()
-                ?? GetProp("og:title") ?? GetMeta("twitter:title");
-            result.Description = GetMeta("description") ?? GetProp("og:description") ?? GetMeta("twitter:description");
-            result.CanonicalUrl = doc.DocumentNode.SelectSingleNode("//link[@rel='canonical']")?.GetAttributeValue("href", null);
-            result.FaviconUrl = doc.DocumentNode.SelectSingleNode("//link[@rel='icon']")?.GetAttributeValue("href", null)
-                            ?? doc.DocumentNode.SelectSingleNode("//link[@rel='shortcut icon']")?.GetAttributeValue("href", null);
-
-            result.LinksCount = doc.DocumentNode.SelectNodes("//a")?.Count ?? 0;
-            result.ScriptsCount = doc.DocumentNode.SelectNodes("//script")?.Count ?? 0;
-            result.ImageCount = doc.DocumentNode.SelectNodes("//img")?.Count ?? 0;
-
-            var isHttps = url.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
-
-            if (isHttps)
-            {
-                result.MixedContent = doc.DocumentNode.SelectNodes("//*[@src or @href]")
-                ?.Any(n =>
-                {
-                    var v = n.GetAttributeValue("src", null) ?? n.GetAttributeValue("href", null);
-                    return v != null && v.StartsWith("http://", StringComparison.OrdinalIgnoreCase);
-                }) == true;
-            }
-
-            var tls = await TryGetTlsInfoAsync(url);
+            var tls = await _tlsCertificateAnalyzer.AnalyzeAsync(url, cancellationToken);
 
             if (tls is not null)
             {
-                result.TlsProtocol = tls.Value.protocol;
-                result.CertSubject = tls.Value.subject;
-                result.CertIssuer = tls.Value.issuer;
-                result.CertNotAfter = tls.Value.notAfter;
-                result.CertDaysToExpiry = (int)Math.Round((tls.Value.notAfter - DateTimeOffset.UtcNow).TotalDays);
+                result.TlsProtocol = tls?.Protocol;
+                result.CertSubject = tls?.Subject;
+                result.CertIssuer = tls?.Issuer;
+                result.CertNotAfter = tls?.NotAfter;
+                result.CertDaysToExpiry = tls is null
+                    ? null
+                    : (int)(tls.NotAfter - DateTimeOffset.UtcNow).TotalDays;
             }
 
-            result.IsSafe = !url.Contains("phishing", StringComparison.OrdinalIgnoreCase)
-                && !url.Contains("malware", StringComparison.OrdinalIgnoreCase);
+            result.RiskScore = _riskScoreCalculator.Calculate(url, result);
+            result.IsSafe = _safetyDecisionAnalyzer.IsSafe(url, result);
 
-            result.RiskScore = ComputeRiskScore(url, result);
+            result.AiAssessment = await _threatClassifier.PredictAsync(result, cancellationToken);
+
+            await _scanResultCache.SetAsync(cacheKey, CloneResult(result), scannedAt, cacheTtl, cancellationToken);
+
+            _logger.LogInformation("Finished scan for URL: {Url}. IsSafe: {IsSafe}, RiskScore: {RiskScore}, StatusCode: {StatusCode}", url, result.IsSafe, result.RiskScore, result.StatusCode);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Scan failed for URL: {Url}", url);
+
             result.IsSafe = false;
             result.RiskScore = 90;
         }
@@ -136,93 +181,69 @@ public sealed class LinkScannerService : ILinkScanner
         return result;
     }
 
-    static bool HasHeader(HttpResponseMessage responseMessage, string name) =>
-        responseMessage.Headers.Contains(name) || responseMessage.Content.Headers.Contains(name);
-
-    static int ComputeRiskScore(string url, LinkScanResult result)
+    private static string BuildCacheKey(string url)
     {
-        int score = 0;
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            return $"scan:{url.Trim().ToLowerInvariant()}";
+        }
 
-        if (!url.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) score += 40;
-        if ((result.StatusCode ?? 200) >= 400) score += 25;
-        if (result.Headers is { HasCSP: false }) score += 5;
-        if (result.Headers is { HasHSTS: false } && url.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) score += 5;
-        if (string.IsNullOrWhiteSpace(result.Title)) score += 5;
-        if (result.MixedContent) score += 10;
-        if ((result.CertDaysToExpiry ?? 365) < 14) score += 10;
-        return Math.Min(100, score);
+        var builder = new UriBuilder(uri)
+        {
+            Scheme = uri.Scheme.ToLowerInvariant(),
+            Host = uri.Host.ToLowerInvariant()
+        };
+
+        return $"scan:{builder.Uri.AbsoluteUri}";
     }
 
-    private async Task<List<string>> GetRedirectsAsync(string url, CancellationToken cancellationToken = default, int maxHops = 5)
+    private static LinkScanResult CloneResult(LinkScanResult source)
     {
-        var list = new List<string>();
-        var handler = new HttpClientHandler { AllowAutoRedirect = false };
-        using var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(5) };
-
-        var current = url;
-
-        for (int i = 0; i < maxHops; i++)
+        return new LinkScanResult
         {
-            using var request = new HttpRequestMessage(HttpMethod.Head, current);
-            using var response = await client.SendAsync(request, cancellationToken);
+            Url = source.Url,
+            IsSafe = source.IsSafe,
+            RiskScore = source.RiskScore,
 
-            if ((int)response.StatusCode is >= 300 and < 400 && response.Headers.Location is Uri location)
-            {
-                var next = location.IsAbsoluteUri
-                    ? location.ToString()
-                    : new Uri(new Uri(current), location).ToString();
+            StatusCode = source.StatusCode,
+            ContentType = source.ContentType,
+            HttpVersion = source.HttpVersion,
+            ServerHeader = source.ServerHeader,
+            XPoweredBy = source.XPoweredBy,
+            TtfbMs = source.TtfbMs,
+            LoadTime = source.LoadTime,
+            HtmlBytes = source.HtmlBytes,
 
-                var validation = await urlSafetyValidator.ValidateAsync(next, cancellationToken);
+            Title = source.Title,
+            Description = source.Description,
+            CanonicalUrl = source.CanonicalUrl,
+            FaviconUrl = source.FaviconUrl,
+            LinksCount = source.LinksCount,
+            ScriptsCount = source.ScriptsCount,
+            ImageCount = source.ImageCount,
+            MixedContent = source.MixedContent,
 
-                if (!validation.IsValid)
-                {
-                    list.Add($"{(int)response.StatusCode} -> BLOCKED: {validation.ErrorMessage}");
-                    break;
-                }
-                    
-                list.Add($"{(int)response.StatusCode} -> {next}");
-                current = next;
-            }
-            else break;
-        }
-        return list;
-    }
+            TlsProtocol = source.TlsProtocol,
+            CertSubject = source.CertSubject,
+            CertIssuer = source.CertIssuer,
+            CertNotAfter = source.CertNotAfter,
+            CertDaysToExpiry = source.CertDaysToExpiry,
 
-    static async Task<List<string>> ResolveIpsAsync(string url)
-    {
-        try
-        {
-            var host = new Uri(url).Host;
-            var ips = await Dns.GetHostAddressesAsync(host);
-            return ips.Select(i => i.ToString()).Distinct().ToList();
-        }
-        catch
-        {
-            return new List<string>();
-        }
-    }
+            FromCache = source.FromCache,
+            ScannedAt = source.ScannedAt,
+            CacheExpiresAt = source.CacheExpiresAt,
 
-    static async Task<(string protocol, string subject, string issuer, DateTimeOffset notAfter)?> TryGetTlsInfoAsync(string url)
-    {
-        try
-        {
-            var uri = new Uri(url);
+            HostIps = source.HostIps.ToList(),
+            RedirectChain = source.RedirectChain.ToList(),
+            Headers = source.Headers,
 
-            if (uri.Scheme != Uri.UriSchemeHttps) 
-            return null;
+            RawHeaders = source.RawHeaders is not null
+                ? source.RawHeaders.ToDictionary(x => x.Key, x => x.Value)
+                : new Dictionary<string, string>(),
 
-            using var client = new TcpClient();
-            await client.ConnectAsync(uri.Host, 443);
-            using var stream = client.GetStream();
-            using var ssl = new SslStream(stream, false, new RemoteCertificateValidationCallback((_, cert, _, _) => cert != null));
-            await ssl.AuthenticateAsClientAsync(uri.Host);
-            var cert2 = new X509Certificate2(ssl.RemoteCertificate!);
-
-            return (ssl.SslProtocol.ToString(), cert2.Subject, cert2.Issuer, cert2.NotAfter);
-        }
-        catch
-        {
-            return null;
-        }
+            RawContentHeaders = source.RawContentHeaders is not null
+                ? source.RawContentHeaders.ToDictionary(x => x.Key, x => x.Value)
+                : new Dictionary<string, string>()
+        };
     }
 }
