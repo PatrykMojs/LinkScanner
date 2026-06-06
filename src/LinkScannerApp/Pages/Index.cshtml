@@ -166,16 +166,6 @@
         v <= 60 ? "bg-warning text-dark" :
         "bg-danger";
 
-    string ThreatLevelText(LinkScanner.Domain.Enums.ThreatLevel level) =>
-        level switch
-        {
-            LinkScanner.Domain.Enums.ThreatLevel.Low => "Low",
-            LinkScanner.Domain.Enums.ThreatLevel.Medium => "Medium",
-            LinkScanner.Domain.Enums.ThreatLevel.High => "High",
-            LinkScanner.Domain.Enums.ThreatLevel.Critical => "Critical",
-            _ => "Unknown"
-        };
-
     string ThreatLevelClass(LinkScanner.Domain.Enums.ThreatLevel level) =>
         level switch
         {
