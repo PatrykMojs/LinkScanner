@@ -3,12 +3,15 @@
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Web%20App-5C2D91?style=for-the-badge&logo=dotnet&logoColor=white)
 ![Razor Pages](https://img.shields.io/badge/Razor%20Pages-Frontend-0A66C2?style=for-the-badge)
+![ML.NET](https://img.shields.io/badge/ML.NET-AI%20Classifier-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![Serilog](https://img.shields.io/badge/Serilog-Logging-1E1E1E?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-**LinkScanner** is a web application for analyzing URLs and estimating whether a website is potentially safe or suspicious.  
-The project combines a simple user-facing interface with a backend scanning pipeline that validates a submitted URL, follows redirects in a controlled way, fetches page metadata, analyzes HTTP/TLS/security-related information and returns a structured scan result.
+**LinkScanner** is a web application for analyzing URLs and estimating whether a website is potentially safe or suspicious.
 
-The application was created as a portfolio project focused on **web security, clean architecture, backend engineering, observability and production-oriented coding practices**.
+The project combines a user-facing Razor Pages interface with a backend scanning pipeline that validates a submitted URL, follows redirects in a controlled way, fetches page metadata, analyzes HTTP/TLS/security-related information, calculates a rule-based risk score and enriches the result with a local **ML.NET-based AI threat assessment**.
+
+The application was created as a portfolio project focused on **web security, clean architecture, backend engineering, observability, AI-assisted classification and production-oriented coding practices**.
 
 ---
 
@@ -21,14 +24,19 @@ The application was created as a portfolio project focused on **web security, cl
 - [Architecture](#architecture)
 - [Project structure](#project-structure)
 - [How the scanning flow works](#how-the-scanning-flow-works)
+- [AI threat classification](#ai-threat-classification)
 - [Security and reliability mechanisms](#security-and-reliability-mechanisms)
 - [Configuration](#configuration)
 - [API usage](#api-usage)
 - [Getting started](#getting-started)
 - [Running tests](#running-tests)
+- [Training the ML.NET model](#training-the-mlnet-model)
 - [Docker](#docker)
+- [Current status](#current-status)
 - [Roadmap](#roadmap)
+- [Portfolio value](#portfolio-value)
 - [Author](#author)
+- [Disclaimer](#disclaimer)
 
 ---
 
@@ -45,7 +53,8 @@ From the engineering perspective, the project is designed to show practical back
 - protecting public endpoints with rate limiting,
 - validating and limiting untrusted user input,
 - designing a scanning pipeline that can be extended with new analyzers,
-- preparing the project for future AI/ML-based URL classification.
+- combining rule-based URL analysis with a local ML.NET classifier,
+- preparing the project for deployment and future product development.
 
 ---
 
@@ -65,9 +74,23 @@ The application accepts a URL from the user and performs a technical scan. The s
 - risk score calculation,
 - final safety decision.
 
+### AI threat assessment
+
+The project includes a local ML.NET-based classifier that analyzes URL-related features and returns an additional AI assessment.
+
+The AI assessment can include:
+
+- predicted label,
+- suspicious probability,
+- threat level,
+- model version,
+- top reasons explaining the prediction.
+
+The AI result is displayed in the web interface as an additional decision-support signal.
+
 ### Web interface
 
-The project contains a Razor Pages frontend that allows the user to scan a link from the browser.
+The project contains a Razor Pages frontend that allows the user to scan a link from the browser and review the result in a readable format.
 
 ### REST API
 
@@ -109,7 +132,7 @@ The application contains configurable limits such as:
 Create a folder like this:
 
 ```text
-/docs/images/
+docs/images/
 ```
 
 Then add screenshots and replace the placeholders below.
@@ -121,6 +144,10 @@ Then add screenshots and replace the placeholders below.
 ### Scan result
 
 ![Scan result](docs/images/scan-result.png)
+
+### AI assessment
+
+![AI assessment](docs/images/ai-assessment.png)
 
 ### API / logs example
 
@@ -144,9 +171,10 @@ A short demo video can be added later, for example:
 | Frontend | Razor Pages, HTML, CSS, JavaScript |
 | API | ASP.NET Core Controllers |
 | Architecture | Clean Architecture-inspired layered structure |
+| AI / ML | ML.NET, local binary classification model |
+| Model training | Console trainer project in `tools/LinkScanner.ModelTrainer` |
 | Logging | Serilog |
 | Rate limiting | ASP.NET Core Rate Limiting |
-| Caching | In-memory cache |
 | Tests | xUnit / .NET test project |
 | Deployment readiness | Dockerfile included |
 
@@ -163,8 +191,10 @@ LinkScanner
 │   ├── LinkScanner.Application
 │   ├── LinkScanner.Domain
 │   └── LinkScanner.Infrastructure
-└── tests
-    └── LinkScanner.Tests
+├── tests
+│   └── LinkScanner.Tests
+└── tools
+    └── LinkScanner.ModelTrainer
 ```
 
 ### `LinkScannerApp`
@@ -182,7 +212,8 @@ Responsible for:
 - security headers,
 - global exception handling,
 - request size limiting,
-- Serilog request logging.
+- Serilog request logging,
+- displaying scan results and AI assessment in the UI.
 
 ### `LinkScanner.Application`
 
@@ -194,7 +225,8 @@ Responsible for:
 - scan command handling,
 - interfaces used by infrastructure,
 - application options,
-- orchestration between validation and scanning logic.
+- scan orchestration,
+- abstractions for URL validation, scanning and threat classification.
 
 Example use case:
 
@@ -204,11 +236,12 @@ UseCases/ScanUrl
 
 ### `LinkScanner.Domain`
 
-Domain layer containing core business entities and models.
+Domain layer containing core business entities, result models and enums.
 
 Responsible for:
 
 - scan result models,
+- AI threat assessment model,
 - domain-level data structures,
 - keeping core concepts independent from external infrastructure.
 
@@ -225,8 +258,22 @@ Responsible for:
 - TLS certificate analysis,
 - security headers analysis,
 - risk score calculation,
-- caching,
+- host/IP resolution,
+- ML.NET threat classification,
+- URL feature extraction,
 - concurrency limiting.
+
+### `LinkScanner.ModelTrainer`
+
+Tooling project used to train and save the local ML.NET model.
+
+Responsible for:
+
+- loading training data from CSV,
+- building the ML.NET pipeline,
+- training the binary classification model,
+- evaluating the model on a holdout test split,
+- saving the model file used by the web application.
 
 ---
 
@@ -251,32 +298,34 @@ src/
 ├── LinkScanner.Application/
 │   ├── Abstractions/
 │   ├── Options/
+│   ├── ThreatIntelligence/
 │   ├── UseCases/
 │   │   └── ScanUrl/
 │   └── DependencyInjection.cs
 │
 ├── LinkScanner.Domain/
-│   └── Entities/
+│   ├── Entities/
+│   └── Enums/
 │
 └── LinkScanner.Infrastructure/
-    ├── Caching/
+    ├── MachineLearning/
+    │   ├── Models/
+    │   │   └── phishing-url-model.zip
+    │   ├── MlNetThreatClassifier.cs
+    │   └── ThreatFeatureExtractor.cs
     ├── Scanning/
     │   ├── Analyzers/
-    │   │   ├── HostIpResolver.cs
-    │   │   ├── HtmlMetadataExtractor.cs
-    │   │   ├── RedirectAnalyzer.cs
-    │   │   ├── RiskScoreCalculator.cs
-    │   │   ├── SafetyDecisionAnalyzer.cs
-    │   │   ├── SecurityHeadersAnalyzer.cs
-    │   │   └── TlsCertificateAnalyzer.cs
     │   ├── Http/
-    │   │   ├── HttpPageFetcher.cs
-    │   │   ├── RedirectHttpClient.cs
-    │   │   └── RedirectHttpResult.cs
-    │   ├── LinkScannerService.cs
-    │   └── SemaphoreScanConcurrencyLimiter.cs
+    │   └── LinkScannerService.cs
     ├── Validation/
     └── DependencyInjection.cs
+
+tools/
+└── LinkScanner.ModelTrainer/
+    ├── Data/
+    ├── Models/
+    ├── Program.cs
+    └── LinkScanner.ModelTrainer.csproj
 ```
 
 ---
@@ -291,8 +340,9 @@ The scan flow is designed as a pipeline:
 4. The application layer validates and orchestrates the scan.
 5. Infrastructure services perform technical analysis of the target URL.
 6. Analyzers collect signals such as redirects, metadata, TLS and security headers.
-7. A risk score is calculated.
-8. A final safety decision is returned to the user.
+7. A rule-based risk score is calculated.
+8. The ML.NET classifier extracts URL features and generates an AI threat assessment.
+9. A final scan result is returned to the user.
 
 Simplified flow:
 
@@ -317,11 +367,94 @@ LinkScannerService
      ├── TlsCertificateAnalyzer
      ├── HostIpResolver
      ├── RiskScoreCalculator
-     └── SafetyDecisionAnalyzer
+     ├── SafetyDecisionAnalyzer
+     └── MlNetThreatClassifier
+              │
+              └── ThreatFeatureExtractor
      │
      ▼
-Scan result
+Scan result + AI assessment
 ```
+
+---
+
+## AI threat classification
+
+LinkScanner contains a local AI classification module based on ML.NET.
+
+The classifier is not an external API integration. It runs locally inside the application and uses a trained model file:
+
+```text
+src/LinkScanner.Infrastructure/MachineLearning/Models/phishing-url-model.zip
+```
+
+### Extracted features
+
+The model is based on URL-related features such as:
+
+- URL length,
+- number of dots,
+- number of hyphens,
+- number of digits,
+- number of special characters,
+- HTTPS usage,
+- IP address used as host,
+- presence of `@` symbol,
+- subdomain count,
+- suspicious keyword count.
+
+The feature extractor also prepares additional technical signals that can be useful for future model improvements, such as:
+
+- status code,
+- redirect count,
+- risk score,
+- title and description presence,
+- links/scripts/images count,
+- mixed content flag,
+- selected security headers,
+- HTML size,
+- load time,
+- certificate days to expiry.
+
+### Suspicious keywords
+
+The current feature extractor checks for common phishing-related keywords, for example:
+
+```text
+login, verify, account, secure, update, bank, paypal, wallet,
+password, confirm, signin, security, billing
+```
+
+### AI output
+
+The AI module can return:
+
+- `isSuspicious`,
+- `probability`,
+- `threatLevel`,
+- `predictedLabel`,
+- `modelVersion`,
+- `topReasons`.
+
+Example conceptual response:
+
+```json
+{
+  "isSuspicious": false,
+  "probability": 0.18,
+  "threatLevel": "Low",
+  "predictedLabel": "Niskie ryzyko",
+  "modelVersion": "mlnet-demo-v0.2",
+  "topReasons": [
+    "Model ML.NET ocenił prawdopodobieństwo podejrzanego linku na 18.00%.",
+    "Model nie wykrył silnych wzorców phishingowych w strukturze adresu URL."
+  ]
+}
+```
+
+### Important note
+
+The AI classifier should be treated as an additional portfolio/educational decision-support mechanism, not as a complete commercial phishing detection engine. Its quality depends on the training data, selected features and model evaluation process.
 
 ---
 
@@ -332,6 +465,8 @@ LinkScanner scans external URLs, so the project includes several mechanisms that
 ### Input validation
 
 The application validates submitted URLs before scanning them.
+
+Validation is intended to reject malformed or unsafe addresses before the application attempts to connect to them.
 
 ### Allowed ports
 
@@ -385,13 +520,7 @@ The scan endpoint uses rate limiting:
 }
 ```
 
-### Concurrency limit
-
-The scanner can limit the number of concurrent scans:
-
-```json
-"MaxConcurrentScans": 3
-```
+When the limit is exceeded, the API returns `429 Too Many Requests` with a retry hint.
 
 ### Security headers
 
@@ -400,6 +529,10 @@ The web application uses custom security headers middleware.
 ### Global exception handling
 
 Unexpected exceptions are handled by global middleware, which improves reliability and prevents leaking implementation details to the client.
+
+### Controlled redirects
+
+The HTTP client is configured with automatic redirects disabled, so redirects can be analyzed manually and limited by application logic.
 
 ---
 
@@ -420,9 +553,7 @@ Example configuration:
     "MaxRedirects": 5,
     "MaxHtmlBytes": 1000000,
     "MaxUrlLength": 2048,
-    "AllowedPorts": [80, 443],
-    "CacheTtlMinutes": 10,
-    "MaxConcurrentScans": 3
+    "AllowedPorts": [80, 443]
   },
   "RateLimiting": {
     "ScanPermitLimit": 10,
@@ -552,6 +683,36 @@ dotnet test tests/LinkScanner.Tests/LinkScanner.Tests.csproj
 
 ---
 
+## Training the ML.NET model
+
+The repository contains a separate console tool for training the ML.NET phishing URL model:
+
+```text
+tools/LinkScanner.ModelTrainer
+```
+
+Run the trainer:
+
+```bash
+dotnet run --project tools/LinkScanner.ModelTrainer/LinkScanner.ModelTrainer.csproj
+```
+
+The trainer loads training data from:
+
+```text
+tools/LinkScanner.ModelTrainer/Data/phishing-training-data.csv
+```
+
+Then it trains the model and saves the generated `.zip` model file to:
+
+```text
+src/LinkScanner.Infrastructure/MachineLearning/Models/phishing-url-model.zip
+```
+
+The web application loads this model at runtime and uses it to generate the AI threat assessment.
+
+---
+
 ## Docker
 
 The project contains a Dockerfile in the web application project.
@@ -580,9 +741,22 @@ http://localhost:8080
 
 ## Current status
 
-The project currently includes the core scanning flow, web interface, API endpoint, logging, rate limiting, configuration options and test project structure.
+The project currently includes:
 
-Planned improvements include AI-based classification, richer reporting, better UI presentation and deployment to a public environment.
+- core URL scanning flow,
+- Razor Pages web interface,
+- REST API endpoint,
+- structured logging with Serilog,
+- rate limiting,
+- request body size limiting,
+- configurable scan limits,
+- security headers middleware,
+- global exception handling,
+- rule-based risk score,
+- local ML.NET threat classifier,
+- ML.NET model trainer tool,
+- test project structure,
+- Dockerfile.
 
 ---
 
@@ -590,9 +764,10 @@ Planned improvements include AI-based classification, richer reporting, better U
 
 Planned or possible future improvements:
 
-- [ ] Add ML.NET-based URL safety classifier.
-- [ ] Train a model on labeled safe/suspicious URL data.
-- [ ] Combine rule-based risk score with AI prediction.
+- [ ] Improve the ML.NET training dataset.
+- [ ] Add more realistic phishing and legitimate URL samples.
+- [ ] Add model evaluation notes to the documentation.
+- [ ] Combine rule-based score and AI assessment into a clearer final verdict.
 - [ ] Add scan history.
 - [ ] Add user accounts.
 - [ ] Add public demo deployment.
@@ -602,6 +777,7 @@ Planned or possible future improvements:
 - [ ] Add more screenshots and a short demo video.
 - [ ] Add Google AdSense integration after deployment.
 - [ ] Add more detailed explanation of each risk factor in the UI.
+- [ ] Add exportable scan reports.
 
 ---
 
@@ -619,7 +795,9 @@ This project demonstrates:
 - API design,
 - configuration-driven application behavior,
 - testable architecture,
-- preparation for AI/ML integration.
+- local ML.NET model integration,
+- building a separate model training tool,
+- presenting AI output in a user-facing web application.
 
 ---
 
@@ -634,3 +812,4 @@ GitHub: [PatrykMeus](https://github.com/PatrykMojs)
 
 LinkScanner is a portfolio and educational project. It can help identify suspicious technical signals, but it should not be treated as a complete security product or a replacement for professional security tools.
 
+The AI classifier is an additional experimental layer and should be interpreted together with the technical scan result, not as a standalone source of truth.
