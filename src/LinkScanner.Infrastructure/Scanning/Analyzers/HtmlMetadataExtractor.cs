@@ -11,42 +11,49 @@ public sealed class HtmlMetadataExtractor
 
         string? GetMeta(string name)
         {
-            return document.DocumentNode
-                .SelectSingleNode($"//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='{name.ToLowerInvariant()}']")
-                ?.GetAttributeValue("content", null)
-                ?.Trim();
+            var node = document.DocumentNode.SelectSingleNode(
+                $"//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='{name.ToLowerInvariant()}']");
+
+            return GetAttribute(node, "content");
         }
 
         string? GetProperty(string property)
         {
-            return document.DocumentNode
-                .SelectSingleNode($"//meta[translate(@property,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='{property.ToLowerInvariant()}']")
-                ?.GetAttributeValue("content", null)
-                ?.Trim();
+            var node = document.DocumentNode.SelectSingleNode(
+                $"//meta[translate(@property,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='{property.ToLowerInvariant()}']");
+
+            return GetAttribute(node, "content");
         }
 
         var title = document.DocumentNode
             .SelectSingleNode("//title")
             ?.InnerText
-            ?.Trim()
-            ?? GetProperty("og:title")
-            ?? GetMeta("twitter:title");
+            ?.Trim();
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            title = GetProperty("og:title") ?? GetMeta("twitter:title");
+        }
 
         var description =
             GetMeta("description")
             ?? GetProperty("og:description")
             ?? GetMeta("twitter:description");
 
-        var canonical = document.DocumentNode
-            .SelectSingleNode("//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='canonical']")
-            ?.GetAttributeValue("href", null);
+        var canonicalNode = document.DocumentNode.SelectSingleNode(
+            "//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='canonical']");
 
-        var favicon = document.DocumentNode
-            .SelectSingleNode("//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='icon']")
-            ?.GetAttributeValue("href", null)
-            ?? document.DocumentNode
-                .SelectSingleNode("//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='shortcut icon']")
-                ?.GetAttributeValue("href", null);
+        var canonical = GetAttribute(canonicalNode, "href");
+
+        var faviconNode = document.DocumentNode.SelectSingleNode(
+            "//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='icon']");
+
+        var shortcutFaviconNode = document.DocumentNode.SelectSingleNode(
+            "//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='shortcut icon']");
+
+        var favicon =
+            GetAttribute(faviconNode, "href")
+            ?? GetAttribute(shortcutFaviconNode, "href");
 
         var links = document.DocumentNode
             .SelectNodes("//a")
@@ -86,11 +93,27 @@ public sealed class HtmlMetadataExtractor
             .SelectNodes("//*[@src or @href]")
             ?.Any(node =>
             {
-                var value = node.GetAttributeValue("src", null)
-                            ?? node.GetAttributeValue("href", null);
+                var src = GetAttribute(node, "src");
+                var href = GetAttribute(node, "href");
+
+                var value = src ?? href;
 
                 return value is not null &&
                        value.StartsWith("http://", StringComparison.OrdinalIgnoreCase);
             }) == true;
+    }
+
+    private static string? GetAttribute(HtmlNode? node, string attributeName)
+    {
+        if (node is null)
+        {
+            return null;
+        }
+
+        var value = node.GetAttributeValue(attributeName, string.Empty).Trim();
+
+        return string.IsNullOrWhiteSpace(value)
+            ? null
+            : value;
     }
 }
