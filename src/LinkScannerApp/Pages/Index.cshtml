@@ -166,6 +166,42 @@
         v <= 60 ? "bg-warning text-dark" :
         "bg-danger";
 
+    string ThreatLevelText(LinkScanner.Domain.Enums.ThreatLevel level) =>
+        level switch
+        {
+            LinkScanner.Domain.Enums.ThreatLevel.Low => "Low",
+            LinkScanner.Domain.Enums.ThreatLevel.Medium => "Medium",
+            LinkScanner.Domain.Enums.ThreatLevel.High => "High",
+            LinkScanner.Domain.Enums.ThreatLevel.Critical => "Critical",
+            _ => "Unknown"
+        };
+
+    string ThreatLevelClass(LinkScanner.Domain.Enums.ThreatLevel level) =>
+        level switch
+        {
+            LinkScanner.Domain.Enums.ThreatLevel.Low => "ai-low",
+            LinkScanner.Domain.Enums.ThreatLevel.Medium => "ai-medium",
+            LinkScanner.Domain.Enums.ThreatLevel.High => "ai-high",
+            LinkScanner.Domain.Enums.ThreatLevel.Critical => "ai-critical",
+            _ => "ai-unknown"
+        };
+
+    string PredictionClass(bool isSuspicious) =>
+        isSuspicious ? "ai-prediction-danger" : "ai-prediction-safe";
+
+    string ThreatLevelTextPl(LinkScanner.Domain.Enums.ThreatLevel level) =>
+        level switch
+        {
+            LinkScanner.Domain.Enums.ThreatLevel.Low => "Niski",
+            LinkScanner.Domain.Enums.ThreatLevel.Medium => "Średni",
+            LinkScanner.Domain.Enums.ThreatLevel.High => "Wysoki",
+            LinkScanner.Domain.Enums.ThreatLevel.Critical => "Krytyczny",
+            _ => "Nieznany"
+        };
+
+    string PredictionText(bool isSuspicious) =>
+        isSuspicious ? "Podejrzany" : "Niskie ryzyko";
+
     var verdictClass = risk <= 30 && r.IsSafe
         ? "safe"
         : risk <= 60
@@ -292,6 +328,136 @@
                 <div>RiskScore</div>
             </div>
         </div>
+
+        @if (r.AiAssessment is not null)
+        {
+            var ai = r.AiAssessment;
+            var probabilityPercent = ai.Probability * 100;
+            var threatClass = ThreatLevelClass(ai.ThreatLevel);
+            var aiStatusClass = ai.IsSuspicious ? "suspicious" : "legitimate";
+
+            var visibleReasons = ai.TopReasons?
+                .Where(x =>
+                    !x.StartsWith("Surowy wynik modelu"))
+                .Take(5)
+                .ToList() ?? new List<string>();
+
+            <div class="ai-accordion mt-3 @aiStatusClass">
+                <button class="ai-accordion-toggle collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#aiAssessmentPanel"
+                        aria-expanded="false"
+                        aria-controls="aiAssessmentPanel">
+
+                    <div class="ai-toggle-left">
+                        <span class="ai-toggle-icon">
+                            <i class="bi bi-cpu"></i>
+                        </span>
+
+                        <div>
+                            <div class="ai-toggle-kicker">Analiza AI</div>
+                            <div class="ai-toggle-title">
+                                Analiza wzorców phishingowych
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ai-toggle-right">
+                        <span class="ai-pill @PredictionClass(ai.IsSuspicious)">
+                            @PredictionText(ai.IsSuspicious)
+                        </span>
+
+                        <span class="ai-toggle-score @threatClass">
+                            @probabilityPercent.ToString("0.00")%
+                        </span>
+
+                        <span class="ai-toggle-level @threatClass">
+                            @ThreatLevelTextPl(ai.ThreatLevel)
+                        </span>
+
+                        <i class="bi bi-chevron-down ai-toggle-chevron"></i>
+                    </div>
+                </button>
+
+                <div id="aiAssessmentPanel" class="collapse">
+                    <div class="ai-accordion-body">
+                        <div class="ai-body-grid">
+                            <div class="ai-score-card">
+                                <div class="ai-score-value @threatClass">
+                                    @probabilityPercent.ToString("0.00")%
+                                </div>
+
+                                <div class="ai-score-label">
+                                    prawdopodobieństwo podejrzanego linku według modelu
+                                </div>
+
+                                <div class="ai-progress mt-3">
+                                    <div class="ai-progress-fill @threatClass"
+                                         style="width: @probabilityPercent.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ai-details-card">
+                                <div class="ai-detail-row">
+                                    <span>Predykcja</span>
+                                    <strong class="@PredictionClass(ai.IsSuspicious)">
+                                        @PredictionText(ai.IsSuspicious)
+                                    </strong>
+                                </div>
+
+                                <div class="ai-detail-row">
+                                    <span>Poziom ryzyka</span>
+                                    <strong class="@threatClass">
+                                        @ThreatLevelTextPl(ai.ThreatLevel)
+                                    </strong>
+                                </div>
+
+                                <div class="ai-detail-row">
+                                    <span>Wersja modelu</span>
+                                    <strong>@ai.ModelVersion</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-explanation">
+                            <div class="ai-explanation-title">
+                                <i class="bi bi-info-circle"></i>
+                                Co wykrył model?
+                            </div>
+
+                            @if (visibleReasons.Count > 0)
+                            {
+                                <div class="ai-reason-list">
+                                    @foreach (var reason in visibleReasons)
+                                    {
+                                        <div class="ai-reason-item">
+                                            <i class="bi bi-check2-circle"></i>
+                                            <span>@reason</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="ai-reason-item muted">
+                                    <i class="bi bi-check2-circle"></i>
+                                    <span>Model nie wykrył silnych wzorców phishingowych w strukturze adresu URL.</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="ai-note">
+                            <i class="bi bi-shield-lock"></i>
+                            <span>
+                                Ocena AI jest dodatkową warstwą analizy. Ostateczny wynik warto interpretować razem z RiskScore, HTTPS, certyfikatem i nagłówkami bezpieczeństwa.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
 
         <div class="reason-list mt-3">
             @foreach (var reason in reasons)
