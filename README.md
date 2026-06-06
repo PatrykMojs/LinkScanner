@@ -127,39 +127,32 @@ The application contains configurable limits such as:
 
 ## Screenshots
 
-> Screenshots are intentionally separated from the source code description, so the README can later be used as portfolio documentation.
-
-Create a folder like this:
-
-```text
-docs/images/
-```
-
-Then add screenshots and replace the placeholders below.
+Below are screenshots presenting the current version of the LinkScanner web interface and scan result view.
 
 ### Home page
 
-![Home page](docs/images/home-page.png)
+The main page allows the user to enter a URL and start a security scan.
+
+![LinkScanner home page](docs/images/home-page.jpg)
 
 ### Scan result
 
-![Scan result](docs/images/scan-result.png)
+After scanning a URL, the application displays the final safety decision, risk score and the most important security indicators.
+
+![LinkScanner scan result](docs/images/scan-result.jpg)
 
 ### AI assessment
 
-![AI assessment](docs/images/ai-assessment.png)
+The application includes an additional ML.NET-based phishing pattern analysis.  
+The AI assessment is displayed as a separate section and should be interpreted together with the rule-based RiskScore, HTTPS, certificate and security headers analysis.
 
-### API / logs example
+![LinkScanner AI assessment](docs/images/ai-assessment.jpg)
 
-![Logs example](docs/images/logs-example.png)
+### Technical details
 
-### Future demo video
+Advanced users can expand the technical details section to inspect HTTP status, response time, downloaded HTML size, server information, IP addresses, TLS certificate data, security headers and extracted metadata.
 
-A short demo video can be added later, for example:
-
-```markdown
-[Watch demo](https://your-demo-link-here)
-```
+![LinkScanner technical details](docs/images/technical-details.jpg)
 
 ---
 
