@@ -1,89 +1,227 @@
 @page
 @model LinkScannerApp.Pages.Articles.BrakHttpsModel
 @{
-    ViewData["Title"] = "Co oznacza brak HTTPS?";
+ViewData["Title"] = "Co oznacza brak HTTPS?";
 }
 
-<section class="policy-page">
-    <div class="policy-header">
-        <div class="policy-header-icon">
-            <i class="bi bi-unlock"></i>
-        </div>
-        <div>
-            <span class="policy-kicker">HTTPS</span>
-            <h1>Co oznacza brak HTTPS?</h1>
-            <p>
-                HTTP bez szyfrowania oznacza, że połączenie ze stroną nie jest chronione w taki sposób,
-                jak przy HTTPS. To szczególnie ważne, gdy na stronie podajesz dane.
-            </p>
-        </div>
+<div class="policy-alert">
+    <i class="bi bi-exclamation-circle"></i>
+    <div>
+        Brak HTTPS nie zawsze oznacza, że strona jest oszustwem. Oznacza jednak, że nie powinno się
+        na niej podawać haseł, danych osobowych, numerów kart ani innych wrażliwych informacji.
     </div>
+</div>
 
-    <div class="policy-alert">
-        <i class="bi bi-exclamation-circle"></i>
-        <div>
-            Brak HTTPS nie zawsze oznacza, że strona jest oszustwem. Oznacza jednak, że nie powinno się
-            na niej podawać haseł, danych osobowych, numerów kart ani innych wrażliwych informacji.
+<div class="policy-grid">
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-globe"></i>
+            </div>
+            <h2>HTTP a HTTPS</h2>
         </div>
-    </div>
 
-    <div class="policy-grid">
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon blue">
-                    <i class="bi bi-globe"></i>
-                </div>
-                <h2>HTTP a HTTPS</h2>
-            </div>
-            <p class="mb-0">
-                HTTP to podstawowy sposób komunikacji przeglądarki ze stroną. HTTPS dodaje do tego
-                szyfrowanie, dzięki czemu osobom trzecim trudniej podejrzeć lub zmodyfikować przesyłane dane.
-            </p>
-        </article>
+        <p>
+            HTTP to podstawowy sposób komunikacji przeglądarki ze stroną internetową. Problem polega na tym,
+            że zwykłe HTTP nie zapewnia szyfrowania połączenia między użytkownikiem a serwerem.
+        </p>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon orange">
-                    <i class="bi bi-person-lock"></i>
-                </div>
-                <h2>Kiedy brak HTTPS jest problemem?</h2>
-            </div>
-            <p class="mb-0">
-                Największe ryzyko pojawia się przy formularzach logowania, płatnościach, zakupach,
-                panelach klienta i miejscach, gdzie wpisujesz dane osobowe. W takich przypadkach HTTPS
-                powinien być absolutnym minimum.
-            </p>
-        </article>
+        <p class="mb-0">
+            HTTPS dodaje szyfrowanie TLS. Dzięki temu osobom trzecim trudniej podejrzeć lub zmodyfikować
+            dane przesyłane pomiędzy przeglądarką a stroną.
+        </p>
+    </article>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon green">
-                    <i class="bi bi-check2-circle"></i>
-                </div>
-                <h2>Czy strona bez HTTPS zawsze jest niebezpieczna?</h2>
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-person-lock"></i>
             </div>
-            <p>
-                Nie zawsze. Prosta strona informacyjna bez formularzy może nie stanowić dużego ryzyka,
-                choć obecnie HTTPS jest standardem nawet dla prostych witryn.
-            </p>
-            <p class="mb-0">
-                Jeżeli jednak strona prosi o logowanie, płatność, pobranie pliku lub podanie danych,
-                a jednocześnie nie korzysta z HTTPS, lepiej z niej nie korzystać.
-            </p>
-        </article>
+            <h2>Kiedy brak HTTPS jest problemem?</h2>
+        </div>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon cyan">
-                    <i class="bi bi-journal-bookmark"></i>
-                </div>
-                <h2>Źródła i dalsza lektura</h2>
+        <p>
+            Największe ryzyko pojawia się przy formularzach logowania, płatnościach, zakupach,
+            panelach klienta i miejscach, gdzie wpisujesz dane osobowe.
+        </p>
+
+        <p class="mb-0">
+            W takich przypadkach HTTPS powinien być absolutnym minimum. Jeżeli strona bez HTTPS prosi
+            o login, hasło, dane karty albo kod BLIK, lepiej z niej nie korzystać.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-check2-circle"></i>
             </div>
-            <ul class="mb-0">
-                <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/HTTPS" target="_blank" rel="noopener">MDN Web Docs – HTTPS</a></li>
-                <li><a href="https://web.dev/articles/why-https-matters" target="_blank" rel="noopener">web.dev – Why HTTPS matters</a></li>
-                <li><a href="https://support.google.com/chrome/answer/95617" target="_blank" rel="noopener">Google Chrome – sprawdzanie bezpieczeństwa połączenia</a></li>
-            </ul>
-        </article>
-    </div>
-</section>
+            <h2>Czy strona bez HTTPS zawsze jest niebezpieczna?</h2>
+        </div>
+
+        <p>
+            Nie zawsze. Prosta strona informacyjna bez formularzy może nie stanowić dużego ryzyka,
+            choć obecnie HTTPS jest standardem nawet dla prostych witryn.
+        </p>
+
+        <p>
+            Brak HTTPS może jednak świadczyć o tym, że strona jest stara, słabiej utrzymywana
+            albo gorzej skonfigurowana technicznie. Nie musi to oznaczać oszustwa, ale jest to sygnał,
+            który warto wziąć pod uwagę.
+        </p>
+
+        <p class="mb-0">
+            Jeżeli strona prosi o logowanie, płatność, pobranie pliku lub podanie danych,
+            a jednocześnie nie korzysta z HTTPS, lepiej zachować ostrożność albo zrezygnować
+            z korzystania z takiej witryny.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-wifi"></i>
+            </div>
+            <h2>Dlaczego szyfrowanie jest ważne?</h2>
+        </div>
+
+        <p>
+            Szyfrowanie chroni dane przesyłane między Twoją przeglądarką a serwerem.
+            Ma to szczególne znaczenie w publicznych sieciach Wi-Fi, na przykład w hotelu,
+            kawiarni, galerii handlowej, pociągu albo na lotnisku.
+        </p>
+
+        <p class="mb-0">
+            Bez HTTPS informacje mogą być bardziej narażone na podejrzenie lub zmianę po drodze.
+            Dlatego przeglądarki coraz częściej oznaczają strony HTTP jako niezabezpieczone.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-search"></i>
+            </div>
+            <h2>Jak sprawdzić HTTPS?</h2>
+        </div>
+
+        <p>
+            Najprościej spojrzeć na pasek adresu przeglądarki. Bezpieczniejsze połączenie powinno
+            zaczynać się od <code>https://</code>. Jeżeli adres zaczyna się od <code>http://</code>,
+            połączenie nie korzysta z HTTPS.
+        </p>
+
+        <p class="mb-0">
+            Warto też kliknąć ikonę przy adresie strony. Przeglądarka zwykle pokazuje tam informacje
+            o połączeniu, certyfikacie i ewentualnych ostrzeżeniach bezpieczeństwa.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-shield-exclamation"></i>
+            </div>
+            <h2>HTTPS nie oznacza pełnego bezpieczeństwa</h2>
+        </div>
+
+        <p>
+            To bardzo ważne: HTTPS chroni połączenie, ale nie gwarantuje, że właściciel strony jest uczciwy.
+            Fałszywa strona również może posiadać certyfikat i działać przez HTTPS.
+        </p>
+
+        <p>
+            Oszust może przygotować stronę, która wygląda jak panel banku, sklep internetowy albo bramka
+            płatności, a mimo to będzie miała aktywne HTTPS. Dlatego sama kłódka w przeglądarce
+            nie wystarcza do oceny wiarygodności strony.
+        </p>
+
+        <p class="mb-0">
+            Oprócz HTTPS zawsze sprawdzaj dokładny adres domeny, treść strony, przekierowania,
+            wygląd formularzy oraz to, czy strona nie wywołuje presji typu „zapłać natychmiast”
+            albo „konto zostanie zablokowane”.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <h2>Jak LinkScanner interpretuje brak HTTPS?</h2>
+        </div>
+
+        <p>
+            LinkScanner traktuje brak HTTPS jako jeden z sygnałów ryzyka. Nie oznacza to automatycznie,
+            że strona jest fałszywa, ale wpływa na ogólną ocenę bezpieczeństwa, szczególnie wtedy,
+            gdy pojawiają się też inne problemy.
+        </p>
+
+        <p>
+            Przykładowo: strona bez HTTPS, z podejrzanym adresem, nietypowymi przekierowaniami
+            i formularzem logowania będzie wyglądała znacznie gorzej niż prosta strona informacyjna,
+            która nie prosi użytkownika o żadne dane.
+        </p>
+
+        <p class="mb-0">
+            Dlatego wynik skanowania warto interpretować całościowo: razem z informacją o certyfikacie,
+            przekierowaniach, nagłówkach bezpieczeństwa, metadanych strony, RiskScore oraz analizą AI.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-list-check"></i>
+            </div>
+            <h2>Krótka lista kontrolna</h2>
+        </div>
+
+        <p>
+            Przed podaniem danych sprawdź:
+        </p>
+
+        <ul class="mb-0">
+            <li>czy adres zaczyna się od <code>https://</code>,</li>
+            <li>czy domena wygląda dokładnie tak, jak powinna,</li>
+            <li>czy przeglądarka nie pokazuje ostrzeżenia,</li>
+            <li>czy strona nie wywołuje presji czasu,</li>
+            <li>czy nie ma podejrzanych przekierowań.</li>
+        </ul>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-credit-card"></i>
+            </div>
+            <h2>Czego nie robić na stronie bez HTTPS?</h2>
+        </div>
+
+        <p>
+            Na stronie bez HTTPS nie powinno się wpisywać danych logowania, danych osobowych,
+            danych płatniczych, kodów jednorazowych, numerów dokumentów ani żadnych informacji,
+            które mogą zostać wykorzystane przeciwko użytkownikowi.
+        </p>
+
+        <p class="mb-0">
+            Szczególnie ostrożnie podchodź do stron, które proszą o szybkie potwierdzenie płatności,
+            dopłatę do przesyłki, odblokowanie konta albo aktualizację danych.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <h2>Źródła i dalsza lektura</h2>
+        </div>
+
+        <ul class="mb-0">
+            <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/HTTPS" target="_blank" rel="noopener">MDN Web Docs – HTTPS</a></li>
+            <li><a href="https://web.dev/articles/why-https-matters" target="_blank" rel="noopener">web.dev – Why HTTPS matters</a></li>
+            <li><a href="https://support.google.com/chrome/answer/95617" target="_blank" rel="noopener">Google Chrome – sprawdzanie bezpieczeństwa połączenia</a></li>
+        </ul>
+    </article>
+</div>

@@ -1,98 +1,271 @@
 @page
 @model LinkScannerApp.Pages.Articles.NaglowkiBezpieczenstwaModel
 @{
-    ViewData["Title"] = "Co to są nagłówki bezpieczeństwa?";
+ViewData["Title"] = "Co to są nagłówki bezpieczeństwa?";
 }
 
-<section class="policy-page">
-    <div class="policy-header">
-        <div class="policy-header-icon">
-            <i class="bi bi-hdd-network"></i>
-        </div>
-        <div>
-            <span class="policy-kicker">Nagłówki HTTP</span>
-            <h1>Co to są nagłówki bezpieczeństwa?</h1>
-            <p>
-                Nagłówki bezpieczeństwa to instrukcje wysyłane przez stronę do przeglądarki.
-                Pomagają ograniczyć część popularnych ataków i poprawiają konfigurację bezpieczeństwa witryny.
-            </p>
-        </div>
+<div class="policy-alert">
+    <i class="bi bi-info-circle"></i>
+    <div>
+        Brak pojedynczego nagłówka nie oznacza automatycznie, że strona jest fałszywa.
+        Może jednak świadczyć o słabszej konfiguracji bezpieczeństwa. Najlepiej oceniać nagłówki
+        razem z HTTPS, certyfikatem, przekierowaniami, adresem domeny i ogólnym zachowaniem strony.
     </div>
+</div>
 
-    <div class="policy-alert">
-        <i class="bi bi-info-circle"></i>
-        <div>
-            Brak pojedynczego nagłówka nie oznacza automatycznie, że strona jest fałszywa.
-            Może jednak świadczyć o słabszej konfiguracji bezpieczeństwa.
+<div class="policy-grid">
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-file-lock"></i>
+            </div>
+            <h2>Po co stronie nagłówki bezpieczeństwa?</h2>
         </div>
-    </div>
 
-    <div class="policy-grid">
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon blue">
-                    <i class="bi bi-file-lock"></i>
-                </div>
-                <h2>Content-Security-Policy</h2>
-            </div>
-            <p class="mb-0">
-                CSP pomaga określić, z jakich źródeł przeglądarka może ładować skrypty, style, obrazy
-                i inne zasoby. Dobrze ustawiony CSP może zmniejszyć ryzyko niektórych ataków typu XSS.
-            </p>
-        </article>
+        <p>
+            Kiedy przeglądarka pobiera stronę internetową, serwer odsyła nie tylko treść HTML,
+            obrazy, style i skrypty, ale również nagłówki HTTP. Część z tych nagłówków może zawierać
+            instrukcje dotyczące bezpieczeństwa.
+        </p>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon green">
-                    <i class="bi bi-lock"></i>
-                </div>
-                <h2>Strict-Transport-Security</h2>
-            </div>
-            <p class="mb-0">
-                HSTS informuje przeglądarkę, że strona powinna być odwiedzana wyłącznie przez HTTPS.
-                To pomaga ograniczyć ryzyko przypadkowego użycia nieszyfrowanego połączenia.
-            </p>
-        </article>
+        <p>
+            Dzięki nim właściciel strony może powiedzieć przeglądarce między innymi, z jakich źródeł
+            wolno ładować skrypty, czy strona może być osadzana w ramkach, czy ma być używane wyłącznie HTTPS,
+            jak obsługiwać typy plików oraz jakie informacje o stronie odsyłającej mogą być przekazywane dalej.
+        </p>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon purple">
-                    <i class="bi bi-window-sidebar"></i>
-                </div>
-                <h2>X-Frame-Options</h2>
-            </div>
-            <p class="mb-0">
-                X-Frame-Options może blokować osadzanie strony w ramkach na innych witrynach.
-                To pomaga ograniczać ataki typu clickjacking.
-            </p>
-        </article>
+        <p class="mb-0">
+            Dobrze skonfigurowane nagłówki nie gwarantują pełnego bezpieczeństwa, ale są oznaką,
+            że witryna została przygotowana bardziej świadomie i z większą dbałością o ochronę użytkownika.
+        </p>
+    </article>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon orange">
-                    <i class="bi bi-shield-plus"></i>
-                </div>
-                <h2>Inne przydatne nagłówki</h2>
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-file-lock"></i>
             </div>
-            <p class="mb-0">
-                Do często spotykanych nagłówków należą też X-Content-Type-Options,
-                Referrer-Policy oraz Permissions-Policy. Każdy z nich odpowiada za inny fragment
-                zachowania przeglądarki.
-            </p>
-        </article>
+            <h2>Content-Security-Policy</h2>
+        </div>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon cyan">
-                    <i class="bi bi-journal-bookmark"></i>
-                </div>
-                <h2>Źródła i dalsza lektura</h2>
+        <p>
+            Content-Security-Policy, czyli CSP, pomaga określić, z jakich źródeł przeglądarka może ładować
+            skrypty, style, obrazy, czcionki i inne zasoby. Dzięki temu właściciel strony może ograniczyć
+            możliwość uruchamiania niechcianego kodu.
+        </p>
+
+        <p class="mb-0">
+            Dobrze ustawiony CSP może zmniejszyć ryzyko części ataków typu XSS, czyli sytuacji,
+            w której złośliwy kod zostaje wstrzyknięty do strony i wykonany w przeglądarce użytkownika.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-lock"></i>
             </div>
-            <ul class="mb-0">
-                <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy" target="_blank" rel="noopener">MDN Web Docs – Content-Security-Policy</a></li>
-                <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options" target="_blank" rel="noopener">MDN Web Docs – X-Frame-Options</a></li>
-                <li><a href="https://web.dev/articles/security-headers" target="_blank" rel="noopener">web.dev – Security headers quick reference</a></li>
-            </ul>
-        </article>
-    </div>
-</section>
+            <h2>Strict-Transport-Security</h2>
+        </div>
+
+        <p>
+            Strict-Transport-Security, czyli HSTS, informuje przeglądarkę, że dana strona powinna być
+            odwiedzana wyłącznie przez HTTPS. Ma to znaczenie zwłaszcza wtedy, gdy użytkownik przypadkowo
+            wpisze adres zaczynający się od <code>http://</code>.
+        </p>
+
+        <p class="mb-0">
+            Dzięki HSTS przeglądarka może automatycznie wymusić bezpieczniejsze połączenie HTTPS
+            i ograniczyć ryzyko użycia nieszyfrowanego połączenia.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-window-sidebar"></i>
+            </div>
+            <h2>X-Frame-Options</h2>
+        </div>
+
+        <p>
+            X-Frame-Options może blokować osadzanie strony w ramkach na innych witrynach.
+            To ważne, ponieważ atakujący mógłby próbować wyświetlić prawdziwą stronę wewnątrz
+            innej strony i nakłonić użytkownika do kliknięcia w coś, czego nie widzi wprost.
+        </p>
+
+        <p class="mb-0">
+            Taki rodzaj zagrożenia nazywa się clickjackingiem. Odpowiednia konfiguracja nagłówka
+            może pomóc ograniczyć ten problem.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-shield-plus"></i>
+            </div>
+            <h2>X-Content-Type-Options</h2>
+        </div>
+
+        <p>
+            X-Content-Type-Options pomaga przeglądarce trzymać się typu pliku zadeklarowanego przez serwer.
+            Najczęściej spotykana wartość tego nagłówka to <code>nosniff</code>.
+        </p>
+
+        <p class="mb-0">
+            Dzięki temu przeglądarka nie powinna zgadywać typu pliku w sposób, który mógłby prowadzić
+            do niebezpiecznego uruchomienia treści jako skryptu lub innego zasobu.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-arrow-left-right"></i>
+            </div>
+            <h2>Referrer-Policy</h2>
+        </div>
+
+        <p>
+            Referrer-Policy określa, ile informacji o stronie odsyłającej może zostać przekazane
+            do kolejnej odwiedzanej witryny. Chodzi o dane z nagłówka referer, czyli informację,
+            z jakiego adresu użytkownik przeszedł dalej.
+        </p>
+
+        <p class="mb-0">
+            Dobrze dobrana polityka może ograniczyć wyciek szczegółowych adresów URL, zwłaszcza wtedy,
+            gdy w linkach znajdują się parametry, identyfikatory lub inne informacje techniczne.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-toggles"></i>
+            </div>
+            <h2>Permissions-Policy</h2>
+        </div>
+
+        <p>
+            Permissions-Policy pozwala ograniczać dostęp strony do wybranych funkcji przeglądarki
+            i urządzenia, takich jak kamera, mikrofon, geolokalizacja czy wybrane mechanizmy śledzenia
+            i interakcji z przeglądarką.
+        </p>
+
+        <p class="mb-0">
+            Nie każda strona potrzebuje dostępu do takich funkcji. Jeżeli witryna ogranicza niepotrzebne
+            uprawnienia, jest to dobry sygnał świadomej konfiguracji.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <h2>Czy brak nagłówków oznacza, że strona jest niebezpieczna?</h2>
+        </div>
+
+        <p>
+            Nie zawsze. Wiele zwykłych stron może nie mieć części nagłówków bezpieczeństwa,
+            a mimo to nie musi być fałszywa. Dotyczy to szczególnie prostych stron informacyjnych,
+            starszych witryn albo małych projektów, które nie były konfigurowane z myślą o pełnym zestawie
+            zabezpieczeń HTTP.
+        </p>
+
+        <p>
+            Brak nagłówków może jednak oznaczać, że strona jest słabiej zabezpieczona przed określonymi
+            klasami ataków. Jest to szczególnie istotne przy aplikacjach z logowaniem, płatnościami,
+            panelem użytkownika, formularzami i danymi osobowymi.
+        </p>
+
+        <p class="mb-0">
+            Dlatego brak nagłówków warto traktować jako sygnał ostrzegawczy, ale nie jako samodzielny dowód,
+            że strona jest oszustwem.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <h2>Jak LinkScanner analizuje nagłówki bezpieczeństwa?</h2>
+        </div>
+
+        <p>
+            LinkScanner sprawdza obecność podstawowych nagłówków bezpieczeństwa i pokazuje, czy strona
+            zwraca między innymi CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+            oraz Permissions-Policy.
+        </p>
+
+        <p>
+            Informacja o nagłówkach jest jedną z części ogólnej analizy. Jeżeli strona ma HTTPS,
+            poprawny certyfikat i sensowną konfigurację nagłówków, jest to lepszy sygnał techniczny
+            niż sytuacja, w której brakuje większości zabezpieczeń.
+        </p>
+
+        <p class="mb-0">
+            Wynik należy jednak interpretować razem z innymi elementami: adresem domeny, przekierowaniami,
+            certyfikatem TLS, treścią strony, RiskScore oraz analizą AI.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-bug"></i>
+            </div>
+            <h2>Jakie ataki mogą ograniczać?</h2>
+        </div>
+
+        <p>
+            Nagłówki bezpieczeństwa mogą pomagać w ograniczaniu skutków ataków takich jak XSS,
+            clickjacking, przypadkowe użycie HTTP zamiast HTTPS, niebezpieczne zgadywanie typu pliku
+            albo nadmierne przekazywanie informacji o stronie odsyłającej.
+        </p>
+
+        <p class="mb-0">
+            Nie są jednak magiczną tarczą. Strona nadal musi mieć poprawny kod, bezpieczne formularze,
+            dobrą walidację danych, aktualne zależności i poprawną konfigurację serwera.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-list-check"></i>
+            </div>
+            <h2>Krótka lista kontrolna</h2>
+        </div>
+
+        <p>
+            Przy ocenie nagłówków warto sprawdzić:
+        </p>
+
+        <ul class="mb-0">
+            <li>czy strona posiada <code>Content-Security-Policy</code>,</li>
+            <li>czy dla HTTPS ustawiono <code>Strict-Transport-Security</code>,</li>
+            <li>czy obecny jest <code>X-Frame-Options</code>,</li>
+            <li>czy ustawiono <code>X-Content-Type-Options</code>,</li>
+            <li>czy strona ogranicza informacje przez <code>Referrer-Policy</code>,</li>
+            <li>czy niepotrzebne funkcje ogranicza <code>Permissions-Policy</code>.</li>
+        </ul>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <h2>Źródła i dalsza lektura</h2>
+        </div>
+
+        <ul class="mb-0">
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy" target="_blank" rel="noopener">MDN Web Docs – Content-Security-Policy</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options" target="_blank" rel="noopener">MDN Web Docs – X-Frame-Options</a></li>
+            <li><a href="https://web.dev/articles/security-headers" target="_blank" rel="noopener">web.dev – Security headers quick reference</a></li>
+        </ul>
+    </article>
+</div>

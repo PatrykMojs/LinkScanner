@@ -1,88 +1,263 @@
 @page
 @model LinkScannerApp.Pages.Articles.CertyfikatSslModel
 @{
-    ViewData["Title"] = "Dlaczego certyfikat SSL jest ważny?";
+ViewData["Title"] = "Dlaczego certyfikat SSL jest ważny?";
 }
 
-<section class="policy-page">
-    <div class="policy-header">
-        <div class="policy-header-icon">
-            <i class="bi bi-patch-check"></i>
-        </div>
-        <div>
-            <span class="policy-kicker">SSL / TLS</span>
-            <h1>Dlaczego certyfikat SSL jest ważny?</h1>
-            <p>
-                Certyfikat SSL/TLS jest jednym z elementów, które pozwalają stronie działać przez HTTPS.
-                Dzięki niemu przeglądarka może zestawić szyfrowane połączenie z serwerem.
-            </p>
-        </div>
+<div class="policy-alert">
+    <i class="bi bi-exclamation-circle"></i>
+    <div>
+        Certyfikat SSL/TLS jest ważny, ale nie jest dowodem uczciwości właściciela strony.
+        Fałszywa strona również może posiadać certyfikat i działać przez HTTPS.
     </div>
+</div>
 
-    <div class="policy-alert">
-        <i class="bi bi-exclamation-circle"></i>
-        <div>
-            Certyfikat SSL jest ważny, ale nie jest dowodem uczciwości właściciela strony.
-            Fałszywa strona również może posiadać certyfikat i działać przez HTTPS.
+<div class="policy-grid">
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-lock"></i>
+            </div>
+            <h2>Co daje certyfikat?</h2>
         </div>
-    </div>
 
-    <div class="policy-grid">
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon blue">
-                    <i class="bi bi-lock"></i>
-                </div>
-                <h2>Co daje certyfikat?</h2>
-            </div>
-            <p class="mb-0">
-                Certyfikat umożliwia szyfrowanie połączenia między przeglądarką a serwerem.
-                Dzięki temu dane przesyłane do strony są trudniejsze do podejrzenia lub zmodyfikowania po drodze.
-            </p>
-        </article>
+        <p>
+            Certyfikat umożliwia szyfrowanie połączenia między przeglądarką a serwerem.
+            Dzięki temu dane przesyłane do strony są trudniejsze do podejrzenia lub zmodyfikowania
+            po drodze.
+        </p>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon green">
-                    <i class="bi bi-calendar-check"></i>
-                </div>
-                <h2>Data ważności</h2>
-            </div>
-            <p class="mb-0">
-                Certyfikat ma określony termin ważności. Jeżeli jest wygasły, przeglądarka może pokazać ostrzeżenie.
-                W takiej sytuacji nie powinno się podawać na stronie danych.
-            </p>
-        </article>
+        <p class="mb-0">
+            Ma to szczególne znaczenie podczas logowania, płatności, wysyłania formularzy
+            i korzystania z paneli użytkownika, gdzie przesyłane są dane wrażliwe.
+        </p>
+    </article>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon orange">
-                    <i class="bi bi-shield-exclamation"></i>
-                </div>
-                <h2>SSL nie oznacza pełnego bezpieczeństwa</h2>
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-calendar-check"></i>
             </div>
-            <p>
-                HTTPS i certyfikat chronią połączenie, ale nie mówią wszystkiego o zamiarach właściciela strony.
-                Oszust może stworzyć stronę z certyfikatem, która wygląda jak panel banku, sklep lub bramka płatności.
-            </p>
-            <p class="mb-0">
-                Dlatego oprócz certyfikatu zawsze sprawdzaj adres domeny, treść strony, przekierowania oraz to,
-                czy strona nie wywołuje presji typu „zapłać natychmiast” albo „konto zostanie zablokowane”.
-            </p>
-        </article>
+            <h2>Data ważności</h2>
+        </div>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon cyan">
-                    <i class="bi bi-journal-bookmark"></i>
-                </div>
-                <h2>Źródła i dalsza lektura</h2>
+        <p>
+            Certyfikat ma określony termin ważności. Jeżeli jest wygasły, przeglądarka może pokazać
+            ostrzeżenie i zablokować lub utrudnić wejście na stronę.
+        </p>
+
+        <p class="mb-0">
+            W takiej sytuacji nie powinno się podawać na stronie danych logowania, danych osobowych,
+            numerów kart, kodów jednorazowych ani żadnych informacji, które powinny pozostać prywatne.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-shield-exclamation"></i>
             </div>
-            <ul class="mb-0">
-                <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/TLS" target="_blank" rel="noopener">MDN Web Docs – TLS</a></li>
-                <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/HTTPS" target="_blank" rel="noopener">MDN Web Docs – HTTPS</a></li>
-                <li><a href="https://letsencrypt.org/docs/" target="_blank" rel="noopener">Let’s Encrypt – dokumentacja</a></li>
-            </ul>
-        </article>
-    </div>
-</section>
+            <h2>SSL nie oznacza pełnego bezpieczeństwa</h2>
+        </div>
+
+        <p>
+            HTTPS i certyfikat chronią połączenie, ale nie mówią wszystkiego o zamiarach właściciela strony.
+            Oszust może stworzyć stronę z certyfikatem, która wygląda jak panel banku, sklep internetowy,
+            bramka płatności albo formularz odbioru przesyłki.
+        </p>
+
+        <p>
+            Dlatego nie wolno traktować samej kłódki w przeglądarce jako gwarancji bezpieczeństwa.
+            Kłódka oznacza głównie to, że połączenie jest szyfrowane, a nie to, że strona jest uczciwa,
+            legalna lub godna zaufania.
+        </p>
+
+        <p class="mb-0">
+            Oprócz certyfikatu zawsze sprawdzaj dokładny adres domeny, treść strony, przekierowania,
+            wygląd formularzy oraz to, czy strona nie wywołuje presji typu „zapłać natychmiast”,
+            „konto zostanie zablokowane” albo „potwierdź dane w ciągu kilku minut”.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-diagram-3"></i>
+            </div>
+            <h2>SSL czy TLS?</h2>
+        </div>
+
+        <p>
+            W praktyce wiele osób nadal mówi „certyfikat SSL”, ale współczesne strony używają protokołu TLS.
+            Nazwa SSL pozostała w języku potocznym, mimo że technicznie chodzi najczęściej o TLS.
+        </p>
+
+        <p class="mb-0">
+            Dla zwykłego użytkownika najważniejsze jest to, czy strona działa przez HTTPS,
+            czy certyfikat jest poprawny i czy przeglądarka nie pokazuje ostrzeżeń bezpieczeństwa.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-browser-chrome"></i>
+            </div>
+            <h2>Co pokazuje przeglądarka?</h2>
+        </div>
+
+        <p>
+            Przeglądarka zwykle pokazuje przy adresie strony ikonę kłódki lub komunikat dotyczący
+            bezpieczeństwa połączenia. Po kliknięciu tej ikony można zobaczyć podstawowe informacje
+            o certyfikacie i połączeniu.
+        </p>
+
+        <p class="mb-0">
+            Jeżeli przeglądarka pokazuje ostrzeżenie o nieważnym certyfikacie, błędzie certyfikatu
+            albo niezabezpieczonym połączeniu, nie ignoruj tego komunikatu.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-person-badge"></i>
+            </div>
+            <h2>Co można odczytać z certyfikatu?</h2>
+        </div>
+
+        <p>
+            Certyfikat może zawierać informacje takie jak nazwa domeny, dla której został wystawiony,
+            wystawca certyfikatu oraz data ważności. Te dane pomagają przeglądarce ocenić,
+            czy połączenie może zostać uznane za poprawne.
+        </p>
+
+        <p>
+            Jeżeli certyfikat został wystawiony dla innej domeny, jest wygasły albo nie może zostać
+            poprawnie zweryfikowany, przeglądarka może pokazać ostrzeżenie. Takiego ostrzeżenia nie warto
+            omijać bez bardzo dobrego powodu.
+        </p>
+
+        <p class="mb-0">
+            Dla użytkownika najważniejsze jest, aby certyfikat był aktualny, pasował do odwiedzanej domeny
+            i nie powodował ostrzeżeń w przeglądarce.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+            <h2>Kiedy certyfikat wygląda poprawnie?</h2>
+        </div>
+
+        <p>
+            Certyfikat wygląda poprawnie, gdy strona działa przez HTTPS, przeglądarka nie pokazuje ostrzeżeń,
+            domena w pasku adresu zgadza się z odwiedzaną stroną, a certyfikat nie jest wygasły.
+        </p>
+
+        <p class="mb-0">
+            Poprawny certyfikat jest dobrym sygnałem technicznym, ale nadal nie wystarcza do pełnej oceny
+            wiarygodności strony.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-x-octagon"></i>
+            </div>
+            <h2>Kiedy certyfikat powinien niepokoić?</h2>
+        </div>
+
+        <p>
+            Ostrożność jest wskazana, gdy certyfikat jest wygasły, nie pasuje do domeny, przeglądarka
+            pokazuje ostrzeżenie albo strona działa w sposób nietypowy mimo obecności HTTPS.
+        </p>
+
+        <p class="mb-0">
+            Szczególnie podejrzane są strony, które mają problemy z certyfikatem, a jednocześnie proszą
+            o logowanie, płatność, kod SMS, kod BLIK lub dane osobowe.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <h2>Jak LinkScanner analizuje certyfikat?</h2>
+        </div>
+
+        <p>
+            LinkScanner może pokazać podstawowe informacje związane z TLS i certyfikatem, takie jak
+            protokół połączenia, wystawca, podmiot certyfikatu, data ważności oraz liczba dni do wygaśnięcia.
+        </p>
+
+        <p>
+            Jeżeli certyfikat wygasa niedługo, wygląda na wygasły albo nie uda się potwierdzić poprawnego
+            połączenia TLS/HTTPS, wynik skanowania może wskazać potrzebę zachowania ostrożności.
+        </p>
+
+        <p class="mb-0">
+            Informacja o certyfikacie jest tylko jedną częścią analizy. Warto interpretować ją razem
+            z adresem domeny, przekierowaniami, nagłówkami bezpieczeństwa, RiskScore oraz analizą AI.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-list-check"></i>
+            </div>
+            <h2>Krótka lista kontrolna</h2>
+        </div>
+
+        <p>
+            Przy ocenie strony sprawdź:
+        </p>
+
+        <ul class="mb-0">
+            <li>czy adres zaczyna się od <code>https://</code>,</li>
+            <li>czy przeglądarka nie pokazuje ostrzeżenia,</li>
+            <li>czy domena wygląda prawidłowo,</li>
+            <li>czy certyfikat nie jest wygasły,</li>
+            <li>czy strona nie prosi o dane w podejrzanym kontekście.</li>
+        </ul>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-lightbulb"></i>
+            </div>
+            <h2>Najprostsza zasada</h2>
+        </div>
+
+        <p>
+            Certyfikat SSL/TLS jest konieczny dla bezpieczniejszego połączenia, ale nie wystarcza
+            do pełnego zaufania stronie.
+        </p>
+
+        <p class="mb-0">
+            Jeżeli strona ma HTTPS, ale domena wygląda dziwnie, treść wywołuje presję lub formularz prosi
+            o dane w nietypowym miejscu, nadal warto zachować ostrożność.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <h2>Źródła i dalsza lektura</h2>
+        </div>
+
+        <ul class="mb-0">
+            <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/TLS" target="_blank" rel="noopener">MDN Web Docs – TLS</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Glossary/HTTPS" target="_blank" rel="noopener">MDN Web Docs – HTTPS</a></li>
+            <li><a href="https://letsencrypt.org/docs/" target="_blank" rel="noopener">Let’s Encrypt – dokumentacja</a></li>
+        </ul>
+    </article>
+</div>
