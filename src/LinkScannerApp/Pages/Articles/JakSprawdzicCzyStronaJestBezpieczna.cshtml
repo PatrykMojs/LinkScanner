@@ -1,123 +1,268 @@
 @page
 @model LinkScannerApp.Pages.Articles.JakSprawdzicCzyStronaJestBezpiecznaModel
 @{
-    ViewData["Title"] = "Jak sprawdzić, czy strona jest bezpieczna?";
+ViewData["Title"] = "Jak sprawdzić, czy strona jest bezpieczna?";
 }
 
-<section class="policy-page">
-    <div class="policy-header">
-        <div class="policy-header-icon">
-            <i class="bi bi-shield-check"></i>
-        </div>
-        <div>
-            <span class="policy-kicker">Poradnik</span>
-            <h1>Jak sprawdzić, czy strona jest bezpieczna?</h1>
-            <p>
-                Zanim wpiszesz login, hasło, dane karty lub pobierzesz plik, warto poświęcić chwilę
-                na sprawdzenie, czy strona nie wygląda podejrzanie.
-            </p>
-        </div>
+<div class="policy-alert">
+    <i class="bi bi-info-circle"></i>
+    <div>
+        Nie istnieje jedna cecha, która daje stuprocentową pewność bezpieczeństwa.
+        Najlepiej patrzeć na kilka sygnałów jednocześnie: adres strony, HTTPS,
+        certyfikat, przekierowania, treść, formularze oraz zachowanie przeglądarki.
     </div>
+</div>
 
-    <div class="policy-alert">
-        <i class="bi bi-info-circle"></i>
-        <div>
-            Nie istnieje jedna cecha, która daje stuprocentową pewność bezpieczeństwa.
-            Najlepiej patrzeć na kilka sygnałów jednocześnie: adres strony, HTTPS,
-            certyfikat, przekierowania, treść oraz zachowanie przeglądarki.
+<div class="policy-grid">
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-link-45deg"></i>
+            </div>
+            <h2>1. Sprawdź dokładnie adres strony</h2>
         </div>
-    </div>
 
-    <div class="policy-grid">
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon blue">
-                    <i class="bi bi-link-45deg"></i>
-                </div>
-                <h2>1. Sprawdź dokładnie adres strony</h2>
-            </div>
-            <p>
-                Najważniejszy jest adres w pasku przeglądarki. Fałszywe strony często używają nazw
-                bardzo podobnych do prawdziwych marek. Różnica może być minimalna: dodatkowa litera,
-                myślnik, dziwna końcówka domeny albo słowo dopisane przed nazwą firmy.
-            </p>
-            <p class="mb-0">
-                Przykład ostrzegawczy: zamiast znanej domeny widzisz długi adres z losowymi znakami,
-                podejrzaną subdomeną albo nazwą, która tylko udaje prawdziwą markę.
-            </p>
-        </article>
+        <p>
+            Najważniejszy jest adres w pasku przeglądarki. Fałszywe strony często używają nazw
+            bardzo podobnych do prawdziwych marek. Różnica może być minimalna: dodatkowa litera,
+            myślnik, dziwna końcówka domeny, literówka albo słowo dopisane przed nazwą firmy.
+        </p>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon green">
-                    <i class="bi bi-lock"></i>
-                </div>
-                <h2>2. Zwróć uwagę na HTTPS</h2>
-            </div>
-            <p class="mb-0">
-                HTTPS oznacza, że połączenie między Twoją przeglądarką a stroną jest szyfrowane.
-                To ważne szczególnie przy logowaniu, płatnościach i formularzach. Brak HTTPS
-                nie zawsze oznacza oszustwo, ale przy podawaniu danych powinien zapalić lampkę ostrzegawczą.
-            </p>
-        </article>
+        <p>
+            Przykładowo podejrzanie może wyglądać adres, który udaje znany bank, sklep lub firmę kurierską,
+            ale zawiera dodatkowe znaki, nietypową subdomenę, losowy ciąg liter albo domenę, której nie znasz.
+            W przypadku phishingu użytkownik często ma uwierzyć, że jest na prawdziwej stronie tylko dlatego,
+            że nazwa wygląda podobnie.
+        </p>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon orange">
-                    <i class="bi bi-exclamation-triangle"></i>
-                </div>
-                <h2>3. Nie ufaj samej kłódce</h2>
-            </div>
-            <p class="mb-0">
-                Kłódka przy adresie informuje głównie o szyfrowaniu połączenia. Nie oznacza automatycznie,
-                że sklep, panel logowania lub formularz są uczciwe. Fałszywa strona również może mieć HTTPS.
-            </p>
-        </article>
+        <p class="mb-0">
+            Zawsze patrz na właściwą domenę, a nie tylko na początek długiego linku. To, że w adresie pojawia się
+            nazwa znanej firmy, nie oznacza jeszcze, że strona faktycznie do niej należy.
+        </p>
+    </article>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon purple">
-                    <i class="bi bi-arrow-left-right"></i>
-                </div>
-                <h2>4. Sprawdź przekierowania</h2>
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-lock"></i>
             </div>
-            <p class="mb-0">
-                Przekierowania same w sobie są normalne. Problem pojawia się wtedy, gdy zaczynasz od
-                znanego adresu, a kończysz na zupełnie innej, dziwnie wyglądającej domenie.
-                LinkScanner pomaga pokazać taki łańcuch przekierowań.
-            </p>
-        </article>
+            <h2>2. Zwróć uwagę na HTTPS</h2>
+        </div>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon cyan">
-                    <i class="bi bi-search"></i>
-                </div>
-                <h2>5. Sprawdź, czy strona nie jest znana jako niebezpieczna</h2>
-            </div>
-            <p>
-                Przeglądarki i usługi bezpieczeństwa, takie jak Google Safe Browsing, analizują strony
-                pod kątem znanych zagrożeń, na przykład phishingu i złośliwego oprogramowania.
-                Jeżeli przeglądarka wyświetla ostrzeżenie, nie ignoruj go.
-            </p>
-            <p class="mb-0">
-                LinkScanner nie zastępuje antywirusa ani systemów reputacyjnych, ale może pomóc
-                wychwycić podstawowe sygnały techniczne, które warto sprawdzić przed wejściem na stronę.
-            </p>
-        </article>
+        <p>
+            HTTPS oznacza, że połączenie między Twoją przeglądarką a stroną jest szyfrowane.
+            To ważne szczególnie przy logowaniu, płatnościach i formularzach, w których podajesz dane osobowe.
+        </p>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon green">
-                    <i class="bi bi-journal-bookmark"></i>
-                </div>
-                <h2>Źródła i dalsza lektura</h2>
+        <p class="mb-0">
+            Brak HTTPS nie zawsze oznacza oszustwo, ale przy podawaniu danych powinien zapalić lampkę ostrzegawczą.
+            Jeżeli strona zaczyna się od <code>http://</code> i prosi o hasło, numer karty albo kod jednorazowy,
+            lepiej z niej nie korzystać.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-exclamation-triangle"></i>
             </div>
-            <ul class="mb-0">
-                <li><a href="https://developers.google.com/safe-browsing" target="_blank" rel="noopener">Google Safe Browsing – dokumentacja</a></li>
-                <li><a href="https://support.google.com/chrome/answer/9890866" target="_blank" rel="noopener">Google Chrome – Safe Browsing</a></li>
-                <li><a href="https://developer.mozilla.org/en-US/docs/Web/Security" target="_blank" rel="noopener">MDN Web Docs – Web security</a></li>
-            </ul>
-        </article>
-    </div>
-</section>
+            <h2>3. Nie ufaj samej kłódce</h2>
+        </div>
+
+        <p>
+            Kłódka przy adresie informuje głównie o szyfrowaniu połączenia. Nie oznacza automatycznie,
+            że sklep, panel logowania, formularz odbioru paczki albo bramka płatności są uczciwe.
+        </p>
+
+        <p class="mb-0">
+            Fałszywa strona również może mieć HTTPS i poprawny certyfikat. Dlatego sama kłódka nie wystarczy.
+            Trzeba dodatkowo sprawdzić domenę, treść strony, przekierowania i kontekst, w którym otrzymałeś link.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-arrow-left-right"></i>
+            </div>
+            <h2>4. Sprawdź przekierowania</h2>
+        </div>
+
+        <p>
+            Przekierowania same w sobie są normalne. Strony używają ich przy zmianie adresu, przejściu
+            z HTTP na HTTPS, wersjach językowych albo kampaniach marketingowych.
+        </p>
+
+        <p class="mb-0">
+            Problem pojawia się wtedy, gdy zaczynasz od znanego adresu, a kończysz na zupełnie innej,
+            dziwnie wyglądającej domenie. LinkScanner pomaga pokazać taki łańcuch przekierowań,
+            dzięki czemu łatwiej zauważyć, dokąd naprawdę prowadzi link.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-search"></i>
+            </div>
+            <h2>5. Sprawdź ostrzeżenia przeglądarki</h2>
+        </div>
+
+        <p>
+            Nowoczesne przeglądarki potrafią ostrzegać przed znanymi zagrożeniami, takimi jak phishing,
+            złośliwe oprogramowanie, niebezpieczne pobieranie plików lub błędny certyfikat.
+        </p>
+
+        <p class="mb-0">
+            Jeżeli przeglądarka wyświetla ostrzeżenie, nie ignoruj go. Komunikaty bezpieczeństwa często
+            pojawiają się właśnie wtedy, gdy strona została już wcześniej oznaczona jako podejrzana
+            albo ma problem techniczny z połączeniem.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-chat-square-text"></i>
+            </div>
+            <h2>6. Oceń treść i zachowanie strony</h2>
+        </div>
+
+        <p>
+            Podejrzane strony często próbują wywołać presję. Mogą informować, że konto zostanie zablokowane,
+            przesyłka nie zostanie doręczona, płatność musi zostać natychmiast potwierdzona albo dostęp
+            do usługi zostanie utracony.
+        </p>
+
+        <p>
+            Warto uważać również na błędy językowe, nietypowe komunikaty, dziwne formularze, brak danych firmy,
+            brak regulaminu, brak polityki prywatności lub przyciski prowadzące do płatności w podejrzanym miejscu.
+        </p>
+
+        <p class="mb-0">
+            Oszustwa często bazują na pośpiechu. Jeżeli strona zmusza Cię do szybkiej decyzji, lepiej zatrzymać się
+            i sprawdzić link jeszcze raz.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-file-earmark-lock"></i>
+            </div>
+            <h2>7. Uważaj na pobieranie plików</h2>
+        </div>
+
+        <p>
+            Niebezpieczne strony mogą zachęcać do pobrania pliku, aktualizacji, faktury, potwierdzenia odbioru
+            albo programu, który rzekomo jest potrzebny do dalszego działania.
+        </p>
+
+        <p class="mb-0">
+            Jeżeli nie spodziewasz się pliku albo strona wygląda podejrzanie, nie pobieraj go.
+            Szczególnie uważaj na pliki wykonywalne, archiwa oraz dokumenty, które wymagają włączenia makr
+            lub dodatkowych uprawnień.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-phone"></i>
+            </div>
+            <h2>8. Sprawdź kontekst linku</h2>
+        </div>
+
+        <p>
+            Ważne jest nie tylko to, jak wygląda strona, ale też skąd masz link. Link z SMS-a, podejrzanego e-maila,
+            komentarza, reklamy albo wiadomości od nieznanej osoby powinien być traktowany ostrożniej.
+        </p>
+
+        <p class="mb-0">
+            Jeżeli wiadomość dotyczy banku, przesyłki, płatności lub konta, najlepiej wejść na stronę ręcznie
+            przez oficjalny adres, zamiast klikać link z wiadomości.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <h2>Jak LinkScanner pomaga w ocenie strony?</h2>
+        </div>
+
+        <p>
+            LinkScanner zbiera w jednym miejscu kilka podstawowych sygnałów technicznych. Może pokazać,
+            czy strona korzysta z HTTPS, jaki jest status odpowiedzi HTTP, czy występują przekierowania,
+            jakie nagłówki bezpieczeństwa są obecne oraz jakie informacje można odczytać z certyfikatu TLS.
+        </p>
+
+        <p>
+            Narzędzie może również pokazać wynik RiskScore i dodatkową analizę AI, która ocenia wybrane cechy
+            adresu URL, takie jak długość linku, podejrzane słowa, nietypowa struktura, znaki specjalne
+            lub inne wzorce często spotykane w linkach phishingowych.
+        </p>
+
+        <p class="mb-0">
+            Wynik skanowania nie jest gwarancją bezpieczeństwa. To pomoc w analizie, która pozwala szybciej
+            zauważyć elementy wymagające ostrożności.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-list-check"></i>
+            </div>
+            <h2>Krótka lista kontrolna</h2>
+        </div>
+
+        <p>
+            Przed podaniem danych sprawdź:
+        </p>
+
+        <ul class="mb-0">
+            <li>czy adres domeny wygląda poprawnie,</li>
+            <li>czy strona korzysta z <code>https://</code>,</li>
+            <li>czy przeglądarka nie pokazuje ostrzeżeń,</li>
+            <li>czy nie ma podejrzanych przekierowań,</li>
+            <li>czy strona nie wywołuje presji czasu,</li>
+            <li>czy formularz nie prosi o zbyt wrażliwe dane.</li>
+        </ul>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-x-octagon"></i>
+            </div>
+            <h2>Kiedy lepiej zamknąć stronę?</h2>
+        </div>
+
+        <p>
+            Zamknij stronę, jeżeli adres wygląda dziwnie, przeglądarka pokazuje ostrzeżenie,
+            strona prosi o kod SMS lub kod BLIK bez jasnego powodu albo wiadomość, z której przyszedł link,
+            brzmi podejrzanie.
+        </p>
+
+        <p class="mb-0">
+            Lepiej stracić chwilę na dodatkową weryfikację niż podać dane na stronie, która może być próbą oszustwa.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <h2>Źródła i dalsza lektura</h2>
+        </div>
+
+        <ul class="mb-0">
+            <li><a href="https://developers.google.com/safe-browsing" target="_blank" rel="noopener">Google Safe Browsing – dokumentacja</a></li>
+            <li><a href="https://support.google.com/chrome/answer/9890866" target="_blank" rel="noopener">Google Chrome – Safe Browsing</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/Security" target="_blank" rel="noopener">MDN Web Docs – Web security</a></li>
+        </ul>
+    </article>
+</div>

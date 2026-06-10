@@ -1,88 +1,266 @@
 @page
 @model LinkScannerApp.Pages.Articles.PrzekierowaniaStronyModel
 @{
-    ViewData["Title"] = "Jak sprawdzić przekierowania strony?";
+ViewData["Title"] = "Jak sprawdzić przekierowania strony?";
 }
 
-<section class="policy-page">
-    <div class="policy-header">
-        <div class="policy-header-icon">
-            <i class="bi bi-arrow-left-right"></i>
-        </div>
-        <div>
-            <span class="policy-kicker">Przekierowania</span>
-            <h1>Jak sprawdzić przekierowania strony?</h1>
-            <p>
-                Przekierowanie oznacza, że po wejściu na jeden adres przeglądarka zostaje przeniesiona
-                pod inny adres. To normalne zjawisko, ale czasem może być wykorzystane do ukrywania celu linku.
-            </p>
-        </div>
+<div class="policy-alert">
+    <i class="bi bi-info-circle"></i>
+    <div>
+        Jedno przekierowanie nie musi oznaczać problemu. Podejrzane są głównie długie łańcuchy
+        przekierowań albo sytuacje, gdy końcowa domena wygląda zupełnie inaczej niż oczekujesz.
     </div>
+</div>
 
-    <div class="policy-alert">
-        <i class="bi bi-info-circle"></i>
-        <div>
-            Jedno przekierowanie nie musi oznaczać problemu. Podejrzane są głównie długie łańcuchy
-            przekierowań albo sytuacje, gdy końcowa domena wygląda zupełnie inaczej niż oczekujesz.
+<div class="policy-grid">
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-signpost"></i>
+            </div>
+            <h2>Po co strony używają przekierowań?</h2>
         </div>
-    </div>
 
-    <div class="policy-grid">
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon blue">
-                    <i class="bi bi-signpost"></i>
-                </div>
-                <h2>Po co strony używają przekierowań?</h2>
-            </div>
-            <p class="mb-0">
-                Przekierowania są używane na przykład przy zmianie adresu strony, przejściu z HTTP na HTTPS,
-                skracaczach linków, kampaniach marketingowych albo przenoszeniu użytkownika do właściwej wersji językowej.
-            </p>
-        </article>
+        <p>
+            Przekierowania są normalną częścią działania stron internetowych. Mogą być używane przy zmianie
+            adresu strony, przejściu z HTTP na HTTPS, przeniesieniu treści na nową domenę albo przekierowaniu
+            użytkownika do właściwej wersji językowej.
+        </p>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon orange">
-                    <i class="bi bi-exclamation-triangle"></i>
-                </div>
-                <h2>Kiedy przekierowanie jest podejrzane?</h2>
-            </div>
-            <p class="mb-0">
-                Ostrożność jest wskazana, gdy link zaczyna się od znanej marki, ale po chwili trafiasz na
-                obcą domenę, dziwny adres, losowe znaki albo stronę proszącą o logowanie.
-            </p>
-        </article>
+        <p class="mb-0">
+            Przekierowania pojawiają się też w kampaniach marketingowych, systemach analitycznych,
+            skracaczach linków i linkach prowadzących przez zewnętrzne systemy śledzenia kliknięć.
+        </p>
+    </article>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon purple">
-                    <i class="bi bi-diagram-3"></i>
-                </div>
-                <h2>Co pokazuje LinkScanner?</h2>
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-exclamation-triangle"></i>
             </div>
-            <p>
-                LinkScanner może pokazać łańcuch przekierowań, czyli kolejne adresy, przez które przechodzi
-                strona przed dotarciem do celu.
-            </p>
-            <p class="mb-0">
-                Jeżeli widzisz wiele przekierowań albo końcowa domena nie pasuje do tego, czego oczekiwałeś,
-                lepiej nie podawać tam danych i sprawdzić link innymi metodami.
-            </p>
-        </article>
+            <h2>Kiedy przekierowanie jest podejrzane?</h2>
+        </div>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon cyan">
-                    <i class="bi bi-journal-bookmark"></i>
-                </div>
-                <h2>Źródła i dalsza lektura</h2>
+        <p>
+            Ostrożność jest wskazana, gdy link zaczyna się od znanej marki, ale po chwili trafiasz na
+            obcą domenę, dziwny adres, losowe znaki albo stronę proszącą o logowanie, płatność
+            lub potwierdzenie danych.
+        </p>
+
+        <p class="mb-0">
+            Podejrzane są również sytuacje, w których końcowa domena nie ma nic wspólnego z tym,
+            czego oczekiwałeś po klikniętym linku.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-diagram-3"></i>
             </div>
-            <ul class="mb-0">
-                <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections" target="_blank" rel="noopener">MDN Web Docs – HTTP redirects</a></li>
-                <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301" target="_blank" rel="noopener">MDN Web Docs – 301 Moved Permanently</a></li>
-                <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302" target="_blank" rel="noopener">MDN Web Docs – 302 Found</a></li>
-            </ul>
-        </article>
-    </div>
-</section>
+            <h2>Czym jest łańcuch przekierowań?</h2>
+        </div>
+
+        <p>
+            Łańcuch przekierowań to kilka kolejnych adresów, przez które przechodzi przeglądarka,
+            zanim dotrze do strony końcowej. Przykładowo użytkownik może kliknąć link A,
+            który przenosi go do linku B, potem do linku C, a dopiero na końcu do właściwej strony.
+        </p>
+
+        <p>
+            Krótki łańcuch przekierowań może być całkowicie normalny. Problem zaczyna się wtedy,
+            gdy przekierowań jest dużo, domeny zmieniają się po drodze albo użytkownik nie jest w stanie
+            łatwo zrozumieć, dokąd ostatecznie trafił.
+        </p>
+
+        <p class="mb-0">
+            Im więcej kroków po drodze, tym trudniej ręcznie ocenić link. Dlatego warto zobaczyć cały
+            przebieg przekierowania, a nie tylko pierwszy adres z wiadomości.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <h2>Kiedy przekierowanie jest normalne?</h2>
+        </div>
+
+        <p>
+            Normalne przekierowanie może wystąpić, gdy strona automatycznie przełącza użytkownika
+            z <code>http://</code> na <code>https://</code>, usuwa lub dodaje <code>www</code>,
+            zmienia adres po aktualizacji serwisu albo kieruje do poprawnej wersji językowej.
+        </p>
+
+        <p class="mb-0">
+            Takie przekierowanie zwykle prowadzi na tę samą domenę albo na domenę, która wyraźnie należy
+            do tej samej usługi.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-link-45deg"></i>
+            </div>
+            <h2>Skracacze linków</h2>
+        </div>
+
+        <p>
+            Skracacze linków mogą być wygodne, ale ukrywają prawdziwy adres docelowy. Użytkownik widzi krótki link,
+            ale nie wie od razu, jaka domena otworzy się po kliknięciu.
+        </p>
+
+        <p class="mb-0">
+            Sam skrócony link nie musi być niebezpieczny, ale warto zachować większą ostrożność,
+            szczególnie gdy pochodzi z SMS-a, podejrzanego e-maila, komentarza albo wiadomości od nieznanej osoby.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-search"></i>
+            </div>
+            <h2>Jak ręcznie ocenić przekierowanie?</h2>
+        </div>
+
+        <p>
+            Najważniejsze jest porównanie adresu początkowego z adresem końcowym. Jeżeli zaczynasz od strony,
+            która wygląda jak bank, sklep, firma kurierska lub serwis płatności, a kończysz na zupełnie obcej
+            domenie, powinno to wzbudzić ostrożność.
+        </p>
+
+        <p>
+            Warto zwrócić uwagę na domenę główną, a nie tylko na początek długiego linku. Oszuści mogą umieszczać
+            nazwę znanej marki w subdomenie, ścieżce adresu albo parametrze, mimo że prawdziwa domena należy
+            do kogoś innego.
+        </p>
+
+        <p class="mb-0">
+            Jeżeli końcowy adres jest bardzo długi, zawiera losowe znaki, wiele parametrów albo kieruje do strony
+            proszącej o logowanie lub płatność, lepiej nie podawać tam danych.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-browser-chrome"></i>
+            </div>
+            <h2>Co widzi przeglądarka?</h2>
+        </div>
+
+        <p>
+            Po przekierowaniu przeglądarka pokazuje końcowy adres w pasku adresu. To właśnie ten adres należy
+            sprawdzić najdokładniej, bo użytkownik może kliknąć jeden link, ale ostatecznie trafić zupełnie gdzie indziej.
+        </p>
+
+        <p class="mb-0">
+            Przed logowaniem, płatnością lub pobraniem pliku zawsze spójrz na adres końcowy,
+            a nie tylko na link, który był widoczny w wiadomości.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-credit-card"></i>
+            </div>
+            <h2>Przekierowania a płatności</h2>
+        </div>
+
+        <p>
+            Przy płatnościach przekierowania są częste, bo sklep może przenieść użytkownika do operatora płatności
+            lub banku. Nie każde przekierowanie w takim procesie jest podejrzane.
+        </p>
+
+        <p class="mb-0">
+            Problem pojawia się wtedy, gdy końcowa strona płatności wygląda nietypowo, domena jest nieznana,
+            brakuje HTTPS albo komunikat wymusza szybkie podanie danych bez możliwości spokojnej weryfikacji.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-diagram-3"></i>
+            </div>
+            <h2>Co pokazuje LinkScanner?</h2>
+        </div>
+
+        <p>
+            LinkScanner może pokazać łańcuch przekierowań, czyli kolejne adresy, przez które przechodzi
+            strona przed dotarciem do celu. Dzięki temu łatwiej zobaczyć, czy link prowadzi tam,
+            gdzie faktycznie powinien.
+        </p>
+
+        <p>
+            Jeżeli widzisz wiele przekierowań, obce domeny po drodze albo końcową domenę, która nie pasuje
+            do treści wiadomości, lepiej nie podawać tam danych i sprawdzić link innymi metodami.
+        </p>
+
+        <p class="mb-0">
+            Informację o przekierowaniach warto interpretować razem z HTTPS, certyfikatem TLS,
+            nagłówkami bezpieczeństwa, RiskScore oraz analizą AI.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-list-check"></i>
+            </div>
+            <h2>Krótka lista kontrolna</h2>
+        </div>
+
+        <p>
+            Przy ocenie przekierowań sprawdź:
+        </p>
+
+        <ul class="mb-0">
+            <li>czy końcowa domena jest zgodna z oczekiwaniami,</li>
+            <li>czy po drodze nie pojawiają się obce domeny,</li>
+            <li>czy liczba przekierowań nie jest nietypowo duża,</li>
+            <li>czy końcowa strona nie prosi o wrażliwe dane,</li>
+            <li>czy adres nie zawiera losowych znaków i podejrzanych parametrów,</li>
+            <li>czy przeglądarka nie pokazuje ostrzeżenia bezpieczeństwa.</li>
+        </ul>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-x-octagon"></i>
+            </div>
+            <h2>Kiedy lepiej nie kontynuować?</h2>
+        </div>
+
+        <p>
+            Lepiej zamknąć stronę, gdy link prowadzi przez wiele nieznanych domen, końcowy adres wygląda
+            zupełnie inaczej niż oczekiwałeś albo strona po przekierowaniu prosi o dane logowania,
+            płatność, kod SMS, kod BLIK lub dane karty.
+        </p>
+
+        <p class="mb-0">
+            W takiej sytuacji bezpieczniej wejść ręcznie na oficjalną stronę danej usługi,
+            zamiast korzystać z linku otrzymanego w wiadomości.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <h2>Źródła i dalsza lektura</h2>
+        </div>
+
+        <ul class="mb-0">
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections" target="_blank" rel="noopener">MDN Web Docs – HTTP redirects</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301" target="_blank" rel="noopener">MDN Web Docs – 301 Moved Permanently</a></li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302" target="_blank" rel="noopener">MDN Web Docs – 302 Found</a></li>
+        </ul>
+    </article>
+</div>
