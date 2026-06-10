@@ -1,75 +1,111 @@
 @page
 @model LinkScannerApp.Pages.AboutModel
 @{
-    ViewData["Title"] = "O projekcie";
+ViewData["Title"] = "O projekcie";
 }
 
-<section class="policy-page">
-    <div class="policy-header">
-        <div class="policy-header-icon">
-            <i class="bi bi-info-circle"></i>
-        </div>
-        <div>
-            <span class="policy-kicker">Poznaj aplikację</span>
-            <h1>O projekcie</h1>
-            <p>
-                LinkScanner to prosta aplikacja internetowa służąca do wstępnej analizy linków.
-                Jej celem jest pomoc użytkownikowi w ocenie, czy dana strona może wyglądać podejrzanie.
-            </p>
-        </div>
+<div class="policy-alert">
+    <i class="bi bi-shield-check"></i>
+    <div>
+        Projekt nie zastępuje antywirusa, profesjonalnego audytu bezpieczeństwa ani zdrowego rozsądku.
+        Pomaga jednak uporządkować najważniejsze informacje o sprawdzanym adresie URL w jednym miejscu.
     </div>
+</div>
 
-    <div class="policy-alert">
-        <i class="bi bi-shield-check"></i>
-        <div>
-            Projekt został stworzony jako narzędzie pomocnicze, które w szybki sposób
-            pozwala sprawdzić podstawowe techniczne wskaźniki bezpieczeństwa strony internetowej.
+<div class="policy-grid">
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon blue">
+                <i class="bi bi-bullseye"></i>
+            </div>
+            <h2>Dlaczego powstał LinkScanner?</h2>
         </div>
-    </div>
 
-    <div class="policy-grid">
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon blue">
-                    <i class="bi bi-bullseye"></i>
-                </div>
-                <h2>Cel aplikacji</h2>
+        <p>
+            Wiele podejrzanych linków wygląda na pierwszy rzut oka zwyczajnie. Mogą trafiać do użytkowników
+            w wiadomościach e-mail, SMS-ach, komunikatorach, komentarzach albo reklamach. Czasem prowadzą
+            do fałszywych paneli logowania, podszywają się pod znane marki albo wykorzystują przekierowania,
+            aby ukryć prawdziwy adres docelowy.
+        </p>
+
+        <p class="mb-0">
+            LinkScanner powstał po to, aby w prosty sposób zebrać podstawowe informacje techniczne o stronie
+            i przedstawić je w formie zrozumiałej dla użytkownika. Dzięki temu łatwiej zauważyć sygnały,
+            które powinny wzbudzić ostrożność przed kliknięciem, logowaniem lub podaniem danych.
+        </p>
+    </article>
+
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon green">
+                <i class="bi bi-search"></i>
             </div>
+            <h2>Co analizuje aplikacja?</h2>
+        </div>
 
-            <p class="mb-0">
-                LinkScanner pomaga użytkownikowi w ocenie, czy podany link może prowadzić
-                do strony wyglądającej podejrzanie lub wymagającej dodatkowej ostrożności.
-            </p>
-        </article>
+        <p class="mb-0">
+            LinkScanner analizuje między innymi protokół HTTP/HTTPS, kod odpowiedzi strony,
+            certyfikat TLS, podstawowe nagłówki bezpieczeństwa, metadane strony, przekierowania,
+            czas odpowiedzi oraz wybrane cechy samego adresu URL.
+        </p>
+    </article>
 
-        <article class="policy-card">
-            <div class="policy-card-head">
-                <div class="policy-card-icon green">
-                    <i class="bi bi-search"></i>
-                </div>
-                <h2>Co analizuje aplikacja?</h2>
+    <article class="policy-card">
+        <div class="policy-card-head">
+            <div class="policy-card-icon purple">
+                <i class="bi bi-cpu"></i>
             </div>
+            <h2>Jaką rolę ma analiza AI?</h2>
+        </div>
 
-            <p class="mb-0">
-                Aplikacja analizuje między innymi protokół HTTPS, przekierowania,
-                podstawowe nagłówki bezpieczeństwa, certyfikat TLS, metadane strony
-                oraz wybrane elementy techniczne.
-            </p>
-        </article>
+        <p class="mb-0">
+            Analiza AI jest dodatkową warstwą pomocniczą. Model może oceniać wybrane wzorce w adresie URL,
+            takie jak długość linku, liczba znaków specjalnych, podejrzane słowa, nietypowa struktura domeny
+            albo elementy często spotykane w linkach phishingowych.
+        </p>
+    </article>
 
-        <article class="policy-card policy-card-full">
-            <div class="policy-card-head">
-                <div class="policy-card-icon orange">
-                    <i class="bi bi-exclamation-triangle"></i>
-                </div>
-                <h2>Ważna informacja</h2>
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon orange">
+                <i class="bi bi-exclamation-triangle"></i>
             </div>
+            <h2>Czego LinkScanner nie gwarantuje?</h2>
+        </div>
 
-            <p class="mb-0">
-                Wynik skanowania ma charakter orientacyjny i nie stanowi gwarancji pełnego
-                bezpieczeństwa strony. Zawsze zachowaj ostrożność przed podaniem danych logowania,
-                danych karty płatniczej lub innych danych osobowych.
-            </p>
-        </article>
-    </div>
-</section>
+        <p>
+            Wynik skanowania ma charakter orientacyjny. Strona oceniona jako niskiego ryzyka nadal może być
+            niebezpieczna, jeżeli na przykład dopiero później zmieni zawartość, wykorzysta złośliwe skrypty,
+            zostanie przejęta przez atakującego albo będzie podszywać się pod znaną markę w sposób trudny
+            do wykrycia automatycznie.
+        </p>
+
+        <p class="mb-0">
+            Z drugiej strony strona oznaczona jako wymagająca ostrożności nie musi być od razu oszustwem.
+            Niektóre poprawne technicznie strony mogą mieć braki konfiguracyjne, nietypowe przekierowania
+            albo niepełne nagłówki bezpieczeństwa. Dlatego wynik należy traktować jako wskazówkę,
+            a nie ostateczny wyrok.
+        </p>
+    </article>
+
+    <article class="policy-card policy-card-full">
+        <div class="policy-card-head">
+            <div class="policy-card-icon cyan">
+                <i class="bi bi-person-check"></i>
+            </div>
+            <h2>Dla kogo jest ten projekt?</h2>
+        </div>
+
+        <p>
+            LinkScanner może być przydatny dla osób, które chcą szybko sprawdzić link otrzymany w wiadomości,
+            zweryfikować stronę przed podaniem danych albo lepiej zrozumieć podstawowe elementy bezpieczeństwa
+            stron internetowych.
+        </p>
+
+        <p class="mb-0">
+            Aplikacja została zaprojektowana tak, aby pokazywać zarówno prosty wynik dla zwykłego użytkownika,
+            jak i szczegóły techniczne dla osób, które chcą dokładniej przeanalizować odpowiedź serwera,
+            certyfikat, nagłówki HTTP lub łańcuch przekierowań.
+        </p>
+    </article>
+</div>
