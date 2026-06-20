@@ -4,131 +4,357 @@
     ViewData["Title"] = "Historia skanów";
 }
 
-<h1 class="h4 mb-3"><i class="bi bi-clock-history"></i> Historia skanów</h1>
+<section class="policy-page">
+    <div class="policy-header">
+        <div class="policy-header-icon">
+            <i class="bi bi-clock-history"></i>
+        </div>
+        <div>
+            <span class="policy-kicker">Historia skanowania</span>
+            <h1>Historia skanów</h1>
+            <p>
+                Historia skanów pozwala wrócić do linków sprawdzonych w bieżącej sesji przeglądarki.
+                Dzięki temu możesz porównać wyniki, sprawdzić wcześniejsze adresy i w razie potrzeby
+                wyeksportować podstawowe dane do pliku CSV.
+            </p>
+        </div>
+    </div>
 
-<div class="d-flex flex-wrap gap-2 mb-3">
-    <button id="exportCsv" class="btn btn-outline-primary btn-sm">
-        <i class="bi bi-download"></i> Eksport CSV
-    </button>
-    <button id="clearHistory" class="btn btn-outline-danger btn-sm">
-        <i class="bi bi-trash"></i> Wyczyść
-    </button>
-</div>
+    <div class="policy-alert">
+        <i class="bi bi-info-circle"></i>
+        <div>
+            Historia skanowania jest przechowywana lokalnie w Twojej przeglądarce przy użyciu mechanizmu
+            <code>sessionStorage</code>. Nie jest to konto użytkownika ani trwała baza danych przypisana do osoby.
+            Po zamknięciu sesji lub wyczyszczeniu danych przeglądarki historia może zostać usunięta.
+        </div>
+    </div>
 
-<div class="table-responsive">
-    <table class="table table-sm align-middle" id="historyTable">
-        <thead class="table-light">
-            <tr>
-                <th>Data</th>
-                <th>URL</th>
-                <th>Status</th>
-                <th>ms</th>
-                <th>Tytuł</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</div>
+    <div class="policy-grid">
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-list-check"></i>
+                </div>
+                <h2>Co znajduje się w historii?</h2>
+            </div>
 
-<p id="emptyState" class="text-muted d-none">Brak skanów w tej sesji.</p>
+            <p>
+                W historii mogą pojawić się adresy URL, data skanowania, orientacyjny status bezpieczeństwa,
+                czas odpowiedzi, kod HTTP, RiskScore oraz tytuł analizowanej strony.
+            </p>
+
+            <p class="mb-0">
+                Dane te pomagają szybciej wrócić do wcześniejszych wyników bez ponownego ręcznego wyszukiwania
+                tego samego linku.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h2>Prywatność historii</h2>
+            </div>
+
+            <p>
+                Historia działa po stronie przeglądarki i dotyczy bieżącej sesji użytkownika.
+                LinkScanner nie wymaga logowania ani tworzenia profilu użytkownika, aby korzystać z tej funkcji.
+            </p>
+
+            <p class="mb-0">
+                Nie wklejaj do skanowania adresów zawierających hasła, tokeny, prywatne identyfikatory sesji
+                lub inne poufne informacje.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-download"></i>
+                </div>
+                <h2>Eksport CSV</h2>
+            </div>
+
+            <p>
+                Jeżeli w historii znajdują się wyniki, możesz pobrać je jako plik CSV.
+                Taki plik można później otworzyć w arkuszu kalkulacyjnym albo zachować jako prostą dokumentację.
+            </p>
+
+            <p class="mb-0">
+                Eksport obejmuje wybrane pola techniczne, takie jak adres URL, status, czas odpowiedzi,
+                tytuł strony, kod HTTP, typ treści oraz RiskScore.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon purple">
+                    <i class="bi bi-trash"></i>
+                </div>
+                <h2>Czyszczenie historii</h2>
+            </div>
+
+            <p>
+                Historię możesz usunąć przyciskiem „Wyczyść”. Spowoduje to usunięcie zapisanych wyników
+                z pamięci sesyjnej przeglądarki dla tej strony.
+            </p>
+
+            <p class="mb-0">
+                Dane lokalne możesz też usunąć z poziomu ustawień przeglądarki albo korzystać z trybu prywatnego.
+            </p>
+        </article>
+
+        <article class="policy-card policy-card-full">
+            <div class="policy-card-head">
+                <div class="policy-card-icon cyan">
+                    <i class="bi bi-table"></i>
+                </div>
+                <h2>Wyniki zapisane w tej sesji</h2>
+            </div>
+
+            <p>
+                Poniżej znajduje się lista skanów zapisanych w bieżącej sesji. Jeżeli tabela jest pusta,
+                wykonaj skanowanie na stronie głównej, a wynik pojawi się tutaj automatycznie.
+            </p>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button id="exportCsv" class="btn btn-outline-primary btn-sm" type="button">
+                    <i class="bi bi-download"></i> Eksport CSV
+                </button>
+
+                <button id="clearHistory" class="btn btn-outline-danger btn-sm" type="button">
+                    <i class="bi bi-trash"></i> Wyczyść
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm align-middle" id="historyTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>URL</th>
+                            <th>Status</th>
+                            <th>RiskScore</th>
+                            <th>HTTP</th>
+                            <th>ms</th>
+                            <th>Tytuł</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="policy-alert d-none mt-3 mb-0">
+                <i class="bi bi-info-circle"></i>
+                <div>
+                    Brak skanów w tej sesji. Przejdź do strony głównej, wklej adres URL i wykonaj pierwsze
+                    skanowanie, aby zobaczyć historię wyników w tym miejscu.
+                    <a asp-page="/Index" class="fw-semibold">Przejdź do skanowania</a>.
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
 
 @section Scripts {
 <script>
     (function () {
         const key = 'scanHistory';
+
         const table = document.getElementById('historyTable');
         const tbody = table?.querySelector('tbody');
         const empty = document.getElementById('emptyState');
         const exportBtn = document.getElementById('exportCsv');
         const clearBtn = document.getElementById('clearHistory');
 
-        let rows = [];
-        try { 
-            rows = JSON.parse(sessionStorage.getItem(key) || '[]'); 
-        } catch {}
+        const get = (row, lower, upper) => row?.[lower] ?? row?.[upper];
 
-        if (!rows.length) { empty?.classList.remove('d-none'); return; }
+        const escapeCsv = (value) => {
+            const text = String(value ?? '');
+            return `"${text.replace(/"/g, '""')}"`;
+        };
 
-        const get = (r, lower, upper) => r?.[lower] ?? r?.[upper];
-
-        const frag = document.createDocumentFragment();
-
-        for (const r of rows) 
-        {
-            const when   = r.scannedAt || r.ScannedAt || new Date().toISOString();
-            const url    = get(r,'url','Url') || '';
-            const title  = get(r,'title','Title') || '';
-            const safeRaw= get(r,'isSafe','IsSafe');
-            const isSafe = (safeRaw === true || safeRaw === 'true');
-
-            let loadMs = get(r,'loadTimeMs','LoadTimeMs');
+        const getLoadMs = (row) => {
+            let loadMs = get(row, 'loadTimeMs', 'LoadTimeMs');
 
             if (loadMs == null) {
-                const lt = get(r,'loadTime','LoadTime');
+                const loadTime = get(row, 'loadTime', 'LoadTime');
 
-                if (lt && typeof lt === 'object') {
-                    if (typeof lt.totalMilliseconds === 'number') loadMs = Math.round(lt.totalMilliseconds);
-                    else if (typeof lt.milliseconds === 'number') loadMs = Math.round(lt.milliseconds);
-                    else if (typeof lt.ticks === 'number') loadMs = Math.round(lt.ticks / 10000);
+                if (loadTime && typeof loadTime === 'object') {
+                    if (typeof loadTime.totalMilliseconds === 'number') {
+                        loadMs = Math.round(loadTime.totalMilliseconds);
+                    } else if (typeof loadTime.milliseconds === 'number') {
+                        loadMs = Math.round(loadTime.milliseconds);
+                    } else if (typeof loadTime.ticks === 'number') {
+                        loadMs = Math.round(loadTime.ticks / 10000);
+                    }
                 }
             }
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="text-nowrap">${new Date(when).toLocaleString()}</td>
-                <td class="text-break"><a href="${url}" target="_blank" rel="noopener">${url}</a></td>
-                <td>${isSafe ? '✅' : '❌'}</td>
-                <td>${loadMs ?? '—'}</td>
-                <td class="text-truncate" style="max-width:380px;">${String(title).replaceAll('<','&lt;')}</td>
-            `;
-            frag.appendChild(tr);
+            return loadMs ?? null;
+        };
+
+        const setEmptyState = () => {
+            empty?.classList.remove('d-none');
+            table?.classList.add('d-none');
+            exportBtn?.setAttribute('disabled', 'disabled');
+            clearBtn?.setAttribute('disabled', 'disabled');
+        };
+
+        const updateHistoryBadge = (count) => {
+            const badge = document.getElementById('historyCount');
+
+            if (!badge) {
+                return;
+            }
+
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('d-none');
+            } else {
+                badge.textContent = '0';
+                badge.classList.add('d-none');
+            }
+        };
+
+        let rows = [];
+
+        try {
+            rows = JSON.parse(sessionStorage.getItem(key) || '[]');
+        } catch {
+            rows = [];
         }
-        tbody?.appendChild(frag);
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+            updateHistoryBadge(0);
+            setEmptyState();
+            return;
+        }
+
+        updateHistoryBadge(rows.length);
+
+        const fragment = document.createDocumentFragment();
+
+        for (const row of rows) {
+            const when = row.scannedAt || row.ScannedAt || new Date().toISOString();
+            const url = get(row, 'url', 'Url') || '';
+            const title = get(row, 'title', 'Title') || '—';
+            const statusCode = get(row, 'statusCode', 'StatusCode') ?? '—';
+            const riskScore = get(row, 'riskScore', 'RiskScore') ?? '—';
+            const loadMs = getLoadMs(row);
+
+            const safeRaw = get(row, 'isSafe', 'IsSafe');
+            const isSafe = safeRaw === true || safeRaw === 'true';
+
+            const tr = document.createElement('tr');
+
+            const dateTd = document.createElement('td');
+            dateTd.className = 'text-nowrap';
+            dateTd.textContent = new Date(when).toLocaleString();
+
+            const urlTd = document.createElement('td');
+            urlTd.className = 'text-break';
+
+            if (url) {
+                const link = document.createElement('a');
+                link.textContent = url;
+                link.href = url;
+                link.target = '_blank';
+                link.rel = 'noopener';
+                urlTd.appendChild(link);
+            } else {
+                urlTd.textContent = '—';
+            }
+
+            const statusTd = document.createElement('td');
+            const statusBadge = document.createElement('span');
+            statusBadge.className = isSafe ? 'badge bg-success' : 'badge bg-danger';
+            statusBadge.textContent = isSafe ? 'Niskie ryzyko' : 'Ostrożnie';
+            statusTd.appendChild(statusBadge);
+
+            const riskTd = document.createElement('td');
+            riskTd.textContent = riskScore;
+
+            const httpTd = document.createElement('td');
+            httpTd.textContent = statusCode;
+
+            const loadTd = document.createElement('td');
+            loadTd.textContent = loadMs ?? '—';
+
+            const titleTd = document.createElement('td');
+            titleTd.className = 'text-truncate';
+            titleTd.style.maxWidth = '380px';
+            titleTd.textContent = title;
+
+            tr.appendChild(dateTd);
+            tr.appendChild(urlTd);
+            tr.appendChild(statusTd);
+            tr.appendChild(riskTd);
+            tr.appendChild(httpTd);
+            tr.appendChild(loadTd);
+            tr.appendChild(titleTd);
+
+            fragment.appendChild(tr);
+        }
+
+        tbody?.appendChild(fragment);
 
         exportBtn?.addEventListener('click', () => {
-            if (!rows.length) return;
-            const header = ['scannedAt','url','isSafe','loadTimeMs','title','description','statusCode','contentType','riskScore'];
-            const lines = [header.join(',')];
+            if (!rows.length) {
+                return;
+            }
 
-            for (const r of rows) {
-                let loadMs = get(r,'loadTimeMs','LoadTimeMs');
+            const header = [
+                'scannedAt',
+                'url',
+                'isSafe',
+                'riskScore',
+                'statusCode',
+                'loadTimeMs',
+                'title',
+                'description',
+                'contentType'
+            ];
 
-                if (loadMs == null) {
-                    const lt = get(r,'loadTime','LoadTime');
-                        if (lt && typeof lt === 'object') {
-                            if (typeof lt.totalMilliseconds === 'number') loadMs = Math.round(lt.totalMilliseconds);
-                            else if (typeof lt.milliseconds === 'number') loadMs = Math.round(lt.milliseconds);
-                            else if (typeof lt.ticks === 'number') loadMs = Math.round(lt.ticks / 10000);
-                        }
-                }
+            const lines = [header.map(escapeCsv).join(',')];
 
-                const row = [
-                    (r.scannedAt || r.ScannedAt || ''),
-                    (get(r,'url','Url') || ''),
-                    ((get(r,'isSafe','IsSafe')===true || get(r,'isSafe','IsSafe')==='true') ? 'true' : 'false'),
-                    (loadMs ?? ''),
-                    String(get(r,'title','Title') || '').replace(/"/g,'""'),
-                    String(get(r,'description','Description') || '').replace(/"/g,'""'),
-                    (get(r,'statusCode','StatusCode') ?? ''),
-                    (get(r,'contentType','ContentType') ?? ''),
-                    (get(r,'riskScore','RiskScore') ?? '')
-                    ].map(v => `"${v}"`).join(',');
-                    lines.push(row);
+            for (const row of rows) {
+                const safeRaw = get(row, 'isSafe', 'IsSafe');
+                const isSafe = safeRaw === true || safeRaw === 'true';
+                const loadMs = getLoadMs(row);
+
+                const csvRow = [
+                    row.scannedAt || row.ScannedAt || '',
+                    get(row, 'url', 'Url') || '',
+                    isSafe ? 'true' : 'false',
+                    get(row, 'riskScore', 'RiskScore') ?? '',
+                    get(row, 'statusCode', 'StatusCode') ?? '',
+                    loadMs ?? '',
+                    get(row, 'title', 'Title') || '',
+                    get(row, 'description', 'Description') || '',
+                    get(row, 'contentType', 'ContentType') || ''
+                ];
+
+                lines.push(csvRow.map(escapeCsv).join(','));
             }
 
             const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `linkscanner_history_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+            const link = document.createElement('a');
+
+            link.href = URL.createObjectURL(blob);
+            link.download = `linkscanner_history_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            URL.revokeObjectURL(link.href);
         });
 
         clearBtn?.addEventListener('click', () => {
             sessionStorage.removeItem(key);
-            const badge = document.getElementById('historyCount');
-            if (badge) { badge.textContent = '0'; badge.classList.add('d-none'); }
+            updateHistoryBadge(0);
             location.reload();
         });
     })();
