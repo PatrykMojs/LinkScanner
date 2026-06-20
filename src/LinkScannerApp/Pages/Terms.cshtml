@@ -23,7 +23,8 @@
         <i class="bi bi-exclamation-circle"></i>
         <div>
             LinkScanner jest narzędziem pomocniczym. Wynik skanowania ma charakter orientacyjny
-            i nie zastępuje samodzielnej oceny bezpieczeństwa strony internetowej.
+            i nie zastępuje samodzielnej oceny bezpieczeństwa strony internetowej, profesjonalnego audytu
+            ani oprogramowania antywirusowego.
         </div>
     </div>
 
@@ -36,8 +37,15 @@
                 <h2>1. Charakter aplikacji</h2>
             </div>
 
+            <p>
+                LinkScanner jest aplikacją internetową służącą do orientacyjnej analizy adresów URL.
+                Narzędzie może sprawdzać między innymi HTTPS, certyfikat TLS, przekierowania,
+                nagłówki bezpieczeństwa, metadane oraz podstawowe sygnały ryzyka.
+            </p>
+
             <p class="mb-0">
-                LinkScanner jest narzędziem służącym do orientacyjnej analizy linków internetowych.
+                Aplikacja ma charakter edukacyjny i pomocniczy. Jej celem jest ułatwienie użytkownikowi
+                zrozumienia, czy dany link wymaga dodatkowej ostrożności.
             </p>
         </article>
 
@@ -49,9 +57,15 @@
                 <h2>2. Brak gwarancji bezpieczeństwa</h2>
             </div>
 
+            <p>
+                Wynik skanowania nie stanowi gwarancji, że dana strona jest w pełni bezpieczna
+                albo w pełni niebezpieczna. Aplikacja opiera się na analizie technicznej,
+                heurystycznej oraz wybranych sygnałach ryzyka.
+            </p>
+
             <p class="mb-0">
-                Wynik skanowania nie stanowi gwarancji, że dana strona jest w pełni bezpieczna lub niebezpieczna.
-                Aplikacja opiera się na analizie technicznej i heurystycznej.
+                Nie wszystkie zagrożenia mogą zostać wykryte automatycznie, dlatego wynik należy traktować
+                jako pomocniczą informację, a nie ostateczną decyzję.
             </p>
         </article>
 
@@ -63,53 +77,207 @@
                 <h2>3. Odpowiedzialność użytkownika</h2>
             </div>
 
+            <p>
+                Użytkownik samodzielnie podejmuje decyzję, czy odwiedzić analizowaną stronę,
+                kliknąć link, pobrać plik, zalogować się lub podać dane.
+            </p>
+
             <p class="mb-0">
-                Użytkownik samodzielnie podejmuje decyzję, czy odwiedzić analizowaną stronę.
                 Zaleca się zachowanie szczególnej ostrożności przy podawaniu danych logowania,
-                danych osobowych lub danych płatniczych.
+                danych osobowych, danych płatniczych, kodów jednorazowych, kodów BLIK
+                lub innych informacji wrażliwych.
             </p>
         </article>
 
         <article class="policy-card">
             <div class="policy-card-head">
                 <div class="policy-card-icon purple">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <h2>4. RiskScore i analiza AI</h2>
+            </div>
+
+            <p>
+                LinkScanner może prezentować orientacyjny wynik ryzyka, określany jako RiskScore,
+                oraz dodatkową ocenę AI. Wyniki te są generowane na podstawie wybranych cech adresu URL
+                i informacji technicznych uzyskanych podczas skanowania.
+            </p>
+
+            <p class="mb-0">
+                RiskScore i analiza AI są elementami pomocniczymi. Powinny być interpretowane razem
+                z HTTPS, certyfikatem, przekierowaniami, nagłówkami oraz treścią strony.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
                     <i class="bi bi-slash-circle"></i>
                 </div>
-                <h2>4. Dozwolone użycie</h2>
+                <h2>5. Dozwolone użycie</h2>
             </div>
+
+            <p>
+                Aplikacja powinna być wykorzystywana wyłącznie w sposób zgodny z prawem,
+                dobrymi obyczajami oraz jej przeznaczeniem.
+            </p>
 
             <p class="mb-0">
                 Zabronione jest wykorzystywanie aplikacji do nadużyć, automatycznego przeciążania serwera,
-                testowania adresów wewnętrznych, skanowania infrastruktury prywatnej lub działań niezgodnych z prawem.
+                testowania adresów wewnętrznych, skanowania infrastruktury prywatnej lub działań
+                niezgodnych z prawem.
             </p>
         </article>
 
         <article class="policy-card">
             <div class="policy-card-head">
                 <div class="policy-card-icon cyan">
-                    <i class="bi bi-wifi-off"></i>
+                    <i class="bi bi-link-45deg"></i>
                 </div>
-                <h2>5. Dostępność usługi</h2>
+                <h2>6. Linki i strony zewnętrzne</h2>
             </div>
 
+            <p>
+                LinkScanner analizuje adresy podawane przez użytkownika, ale nie kontroluje treści
+                stron zewnętrznych. Zawartość analizowanych witryn może zmieniać się niezależnie
+                od działania aplikacji.
+            </p>
+
             <p class="mb-0">
-                Administrator nie gwarantuje ciągłej dostępności aplikacji.
-                Usługa może być czasowo niedostępna z powodu prac technicznych,
-                ograniczeń hostingu lub innych przyczyn.
+                Administrator nie odpowiada za treści, formularze, pliki, usługi ani działania podejmowane
+                na stronach zewnętrznych odwiedzanych przez użytkownika.
             </p>
         </article>
 
         <article class="policy-card">
             <div class="policy-card-head">
                 <div class="policy-card-icon blue">
-                    <i class="bi bi-arrow-repeat"></i>
+                    <i class="bi bi-clock-history"></i>
                 </div>
-                <h2>6. Zmiany regulaminu</h2>
+                <h2>7. Historia skanowania</h2>
             </div>
 
+            <p>
+                Aplikacja może udostępniać funkcję historii skanowania w ramach bieżącej sesji użytkownika.
+                Historia może być zapisywana lokalnie w przeglądarce z wykorzystaniem mechanizmu
+                <code>sessionStorage</code>.
+            </p>
+
             <p class="mb-0">
-                Regulamin może zostać zmieniony w dowolnym momencie,
-                szczególnie w przypadku rozwoju aplikacji lub dodania nowych funkcji.
+                Historia skanowania nie jest kontem użytkownika i może zostać usunięta po zamknięciu sesji,
+                wyczyszczeniu danych przeglądarki lub zakończeniu działania mechanizmu przechowywania lokalnego.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-wifi-off"></i>
+                </div>
+                <h2>8. Dostępność usługi</h2>
+            </div>
+
+            <p>
+                Administrator nie gwarantuje ciągłej ani nieprzerwanej dostępności aplikacji.
+                Usługa może być czasowo niedostępna z powodu prac technicznych, ograniczeń hostingu,
+                aktualizacji lub błędów.
+            </p>
+
+            <p class="mb-0">
+                Aplikacja może działać wolniej przy dużym obciążeniu, problemach z hostingiem
+                lub podczas pierwszego uruchomienia po okresie bezczynności.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-badge-ad"></i>
+                </div>
+                <h2>9. Reklamy</h2>
+            </div>
+
+            <p>
+                Aplikacja może wyświetlać reklamy dostarczane przez zewnętrznych partnerów reklamowych,
+                w tym Google AdSense.
+            </p>
+
+            <p class="mb-0">
+                Wyświetlenie reklamy w aplikacji nie oznacza rekomendacji reklamowanego produktu,
+                usługi lub strony przez administratora LinkScanner.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon purple">
+                    <i class="bi bi-exclamation-diamond"></i>
+                </div>
+                <h2>10. Ograniczenie odpowiedzialności</h2>
+            </div>
+
+            <p>
+                Administrator dokłada starań, aby aplikacja działała poprawnie i prezentowała użyteczne informacje,
+                jednak nie gwarantuje kompletności, aktualności ani pełnej poprawności wyników skanowania.
+            </p>
+
+            <p class="mb-0">
+                Administrator nie ponosi odpowiedzialności za decyzje podjęte przez użytkownika na podstawie
+                wyniku skanowania, w szczególności za podanie danych, pobranie pliku lub wykonanie płatności.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h2>11. Prywatność</h2>
+            </div>
+
+            <p>
+                Informacje dotyczące prywatności, przechowywania danych, historii skanowania,
+                plików cookies, reklam oraz usług zewnętrznych znajdują się w osobnej polityce prywatności.
+            </p>
+
+            <p class="mb-0">
+                <a asp-page="/Privacy" class="fw-semibold">Przejdź do polityki prywatności</a>.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-envelope"></i>
+                </div>
+                <h2>12. Kontakt</h2>
+            </div>
+
+            <p>
+                W sprawach związanych z aplikacją, regulaminem, prywatnością, błędami lub sugestiami rozwoju
+                można skorzystać z danych podanych na stronie kontaktowej.
+            </p>
+
+            <p class="mb-0">
+                <a asp-page="/Contact" class="fw-semibold">Przejdź do strony kontaktowej</a>.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon cyan">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <h2>13. Zmiany regulaminu</h2>
+            </div>
+
+            <p>
+                Regulamin może zostać zaktualizowany w przypadku rozwoju aplikacji, dodania nowych funkcji,
+                zmian technicznych, zmian organizacyjnych lub konieczności doprecyzowania zasad korzystania.
+            </p>
+
+            <p class="mb-0">
+                Data ostatniej aktualizacji: 20.06.2026.
             </p>
         </article>
     </div>
