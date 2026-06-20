@@ -1,0 +1,264 @@
+@page
+@model LinkScannerApp.Pages.JakToDzialaModel
+@{
+    ViewData["Title"] = "Jak to działa?";
+}
+
+<section class="policy-page">
+    <div class="policy-header">
+        <div class="policy-header-icon">
+            <i class="bi bi-diagram-3"></i>
+        </div>
+        <div>
+            <span class="policy-kicker">Mechanizm działania</span>
+            <h1>Jak działa LinkScanner?</h1>
+            <p>
+                LinkScanner wykonuje wstępną analizę podanego adresu URL i pokazuje najważniejsze informacje,
+                które mogą pomóc w ocenie, czy dana strona wygląda bezpiecznie. Narzędzie łączy analizę techniczną,
+                wynik ryzyka oraz dodatkową ocenę AI.
+            </p>
+        </div>
+    </div>
+
+    <div class="policy-alert">
+        <i class="bi bi-info-circle"></i>
+        <div>
+            LinkScanner nie daje stuprocentowej gwarancji bezpieczeństwa. Wynik skanowania należy traktować
+            jako pomocniczą informację, która ułatwia zauważenie podejrzanych elementów przed wejściem na stronę,
+            logowaniem, płatnością lub pobraniem pliku.
+        </div>
+    </div>
+
+    <div class="policy-grid">
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-link-45deg"></i>
+                </div>
+                <h2>1. Podajesz adres URL</h2>
+            </div>
+
+            <p>
+                Analiza zaczyna się od wpisania adresu strony w formularzu. Link powinien być pełnym adresem,
+                najlepiej zaczynającym się od <code>https://</code> albo <code>http://</code>.
+            </p>
+
+            <p class="mb-0">
+                Nie należy wklejać linków zawierających hasła, tokeny, prywatne identyfikatory sesji,
+                kody jednorazowe lub inne dane poufne.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <h2>2. Aplikacja sprawdza poprawność linku</h2>
+            </div>
+
+            <p>
+                Przed wykonaniem skanowania aplikacja sprawdza, czy podany tekst wygląda jak prawidłowy adres URL
+                i czy można go bezpiecznie przetworzyć.
+            </p>
+
+            <p class="mb-0">
+                Taki etap pomaga ograniczyć błędne zapytania, przypadkowe wpisy oraz próby użycia adresów,
+                które nie powinny być analizowane przez publiczne narzędzie.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-hdd-network"></i>
+                </div>
+                <h2>3. Wykonywane jest zapytanie techniczne</h2>
+            </div>
+
+            <p>
+                LinkScanner próbuje połączyć się z podaną stroną i odczytać podstawowe informacje techniczne.
+                Może to obejmować status odpowiedzi HTTP, czas odpowiedzi, typ treści, metadane strony
+                oraz podstawowe informacje o serwerze.
+            </p>
+
+            <p class="mb-0">
+                Dzięki temu użytkownik może zobaczyć, czy strona odpowiada poprawnie, czy zwraca błąd
+                oraz czy wygląda jak normalnie działająca witryna.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-lock"></i>
+                </div>
+                <h2>4. Sprawdzane jest HTTPS i TLS</h2>
+            </div>
+
+            <p>
+                Jednym z podstawowych elementów analizy jest sprawdzenie, czy strona korzysta z HTTPS
+                oraz czy można odczytać informacje o połączeniu TLS i certyfikacie.
+            </p>
+
+            <p class="mb-0">
+                HTTPS jest ważne szczególnie wtedy, gdy strona prosi o logowanie, dane osobowe,
+                dane płatnicze lub inne informacje wrażliwe.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon purple">
+                    <i class="bi bi-arrow-left-right"></i>
+                </div>
+                <h2>5. Analizowane są przekierowania</h2>
+            </div>
+
+            <p>
+                Strona może przekierować użytkownika z jednego adresu na inny. Jest to normalne na przykład
+                przy przejściu z HTTP na HTTPS, zmianie domeny lub użyciu skracacza linków.
+            </p>
+
+            <p class="mb-0">
+                LinkScanner może pokazać łańcuch przekierowań, dzięki czemu łatwiej sprawdzić,
+                czy końcowy adres nadal wygląda wiarygodnie.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon cyan">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h2>6. Sprawdzane są nagłówki bezpieczeństwa</h2>
+            </div>
+
+            <p>
+                Aplikacja sprawdza obecność wybranych nagłówków HTTP związanych z bezpieczeństwem,
+                takich jak Content-Security-Policy, Strict-Transport-Security, X-Frame-Options,
+                X-Content-Type-Options, Referrer-Policy oraz Permissions-Policy.
+            </p>
+
+            <p class="mb-0">
+                Brak pojedynczego nagłówka nie oznacza od razu oszustwa, ale może świadczyć
+                o słabszej konfiguracji technicznej strony.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <h2>7. Obliczany jest RiskScore</h2>
+            </div>
+
+            <p>
+                RiskScore to orientacyjny wynik ryzyka prezentowany w skali od 0 do 100.
+                Im wyższy wynik, tym więcej elementów wymaga ostrożności.
+            </p>
+
+            <p class="mb-0">
+                Wynik może uwzględniać między innymi brak HTTPS, problemy z certyfikatem,
+                przekierowania, błędy odpowiedzi strony lub inne sygnały techniczne.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon purple">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <h2>8. Dodatkowa analiza AI</h2>
+            </div>
+
+            <p>
+                LinkScanner może korzystać z dodatkowej analizy AI, która ocenia wybrane cechy adresu URL.
+                Model może brać pod uwagę strukturę linku, długość adresu, podejrzane słowa,
+                liczbę znaków specjalnych i wzorce często spotykane w linkach phishingowych.
+            </p>
+
+            <p class="mb-0">
+                Ocena AI jest tylko jedną z warstw analizy. Nie powinna być traktowana jako samodzielna
+                i ostateczna decyzja o bezpieczeństwie strony.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon orange">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h2>9. Ograniczenia narzędzia</h2>
+            </div>
+
+            <p>
+                LinkScanner nie zastępuje antywirusa, systemów reputacyjnych, profesjonalnego audytu
+                bezpieczeństwa ani zdrowego rozsądku użytkownika.
+            </p>
+
+            <p class="mb-0">
+                Strona może wyglądać technicznie poprawnie, a mimo to być próbą oszustwa.
+                Dlatego zawsze warto sprawdzać domenę, treść strony, kontekst wiadomości i zachowanie formularzy.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon green">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h2>10. Historia skanowania</h2>
+            </div>
+
+            <p>
+                Wyniki skanowania mogą być zapisywane lokalnie w przeglądarce użytkownika w ramach bieżącej sesji,
+                na przykład przy użyciu mechanizmu <code>sessionStorage</code>.
+            </p>
+
+            <p class="mb-0">
+                Historia nie jest kontem użytkownika ani trwałą bazą danych przypisaną do osoby.
+                Może zostać usunięta po zamknięciu sesji lub wyczyszczeniu danych przeglądarki.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon blue">
+                    <i class="bi bi-list-check"></i>
+                </div>
+                <h2>Jak interpretować wynik?</h2>
+            </div>
+
+            <p>
+                Najlepiej patrzeć na wynik całościowo. Niski RiskScore, HTTPS i poprawny certyfikat
+                są dobrymi sygnałami, ale nie dają pełnej gwarancji bezpieczeństwa.
+            </p>
+
+            <p class="mb-0">
+                Jeżeli adres wygląda dziwnie, strona prosi o dane w nietypowym miejscu albo wiadomość
+                wywołuje presję czasu, lepiej zachować ostrożność niezależnie od wyniku skanowania.
+            </p>
+        </article>
+
+        <article class="policy-card">
+            <div class="policy-card-head">
+                <div class="policy-card-icon cyan">
+                    <i class="bi bi-journal-text"></i>
+                </div>
+                <h2>Dowiedz się więcej</h2>
+            </div>
+
+            <p>
+                Szczegółowe wyjaśnienia poszczególnych elementów znajdziesz w bazie wiedzy LinkScanner.
+                Opisujemy tam HTTPS, certyfikaty SSL/TLS, przekierowania, nagłówki bezpieczeństwa
+                i podstawowe zasady oceny linków.
+            </p>
+
+            <p class="mb-0">
+                <a asp-page="/Articles/Index" class="fw-semibold">Przejdź do bazy wiedzy</a>.
+            </p>
+        </article>
+    </div>
+</section>
